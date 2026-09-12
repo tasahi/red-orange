@@ -1,0 +1,28 @@
+<script type="text/javascript">
+    RED.nodes.registerType('or-bridge-in', {
+        category: 'Bridge',
+        color: '#E2D96E',
+        defaults: {
+            name: { value: "" }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "bridge.svg",
+        paletteLabel: "Node-RED In",
+        label: function() {
+            return this.name || "Node-RED In";
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-bridge-in">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-bridge-in">
+    <p>Converts native Node-RED <code>msg.payload</code> (JSON array) into an OrangeRed Table.</p>
+    <p>When this node receives a message, it automatically triggers execution of the downstream OrangeRed workflow.</p>
+</script>

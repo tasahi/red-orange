@@ -1,0 +1,53 @@
+<script type="text/javascript">
+    if (!window.orangeredTrackerLoaded) {
+        window.orangeredTrackerLoaded = true;
+        $.getScript("orangered/tracker-ui.js");
+    }
+
+    RED.nodes.registerType('or-random-forest', {
+        category: 'OR Model',
+        color: '#FAC1D9',
+        defaults: {
+            name: { value: "" },
+            nEstimators: { value: 100 },
+            maxDepth: { value: "" },
+            randomState: { value: "" }
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: ["Learner", "Model"],
+        icon: "font-awesome/fa-tree",
+        paletteLabel: "Random Forest",
+        label: function() {
+            return this.name || "Random Forest";
+        },
+        oneditprepare: function() {
+            if (window.orangeredTracker) {
+                window.orangeredTracker.addHistoryPanel(this);
+            }
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-random-forest">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-nEstimators"><i class="fa fa-cubes"></i> Trees</label>
+        <input type="number" id="node-input-nEstimators" placeholder="100">
+    </div>
+    <div class="form-row">
+        <label for="node-input-maxDepth"><i class="fa fa-level-down"></i> Max Depth</label>
+        <input type="number" id="node-input-maxDepth" placeholder="(Unlimited)">
+    </div>
+    <div class="form-row">
+        <label for="node-input-randomState"><i class="fa fa-key"></i> Random Seed</label>
+        <input type="number" id="node-input-randomState" placeholder="(None)">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-random-forest">
+    <p>Predicts using an ensemble of decision trees.</p>
+</script>

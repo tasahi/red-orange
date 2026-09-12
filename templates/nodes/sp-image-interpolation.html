@@ -1,0 +1,75 @@
+<script type="text/html" data-template-name="sp-image-interpolation">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-filter_type"><i class="fa fa-filter"></i> Filter</label>
+        <select id="node-input-filter_type">
+            <option value="zoom">Zoom</option>
+            <option value="rotate">Rotate</option>
+            <option value="shift">Shift</option>
+            <option value="extract_r">Extract Red</option>
+            <option value="extract_g">Extract Green</option>
+            <option value="extract_b">Extract Blue</option>
+        </select>
+    </div>
+    <div class="form-row" id="row-zoom">
+        <label for="node-input-zoom_factor"><i class="fa fa-search-plus"></i> Zoom Factor</label>
+        <input type="number" id="node-input-zoom_factor" step="0.1" value="0.5">
+    </div>
+    <div class="form-row" id="row-angle">
+        <label for="node-input-angle"><i class="fa fa-rotate-right"></i> Angle</label>
+        <input type="number" id="node-input-angle" step="1" value="45">
+    </div>
+    <div class="form-row" id="row-reshape">
+        <label for="node-input-reshape"><i class="fa fa-expand"></i> Reshape</label>
+        <input type="checkbox" id="node-input-reshape" style="width:auto; margin-top:0;">
+    </div>
+    <div class="form-row" id="row-shift_x">
+        <label for="node-input-shift_x"><i class="fa fa-arrow-right"></i> Shift X</label>
+        <input type="number" id="node-input-shift_x" step="1" value="10">
+    </div>
+    <div class="form-row" id="row-shift_y">
+        <label for="node-input-shift_y"><i class="fa fa-arrow-down"></i> Shift Y</label>
+        <input type="number" id="node-input-shift_y" step="1" value="10">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('sp-image-interpolation', {
+        category: 'SP NDImage',
+        paletteLabel: "Im.Interpolation",
+        color: '#8dd3c7',
+        defaults: {
+            name: { value: "" },
+            filter_type: { value: "zoom" },
+            zoom_factor: { value: 0.5 },
+            angle: { value: 45 },
+            reshape: { value: true },
+            shift_x: { value: 10 },
+            shift_y: { value: 10 }
+        },
+        inputs: 1,
+        outputs: 1,
+        inputLabels: ["Image"],
+        outputLabels: ["Image"],
+        icon: "font-awesome/fa-crop",
+        label: function () {
+            if (this.name) { return this.name; }
+            if (this.filter_type) {
+                return this.filter_type.replace(/_/g, ' ').replace(/\w/g, l => l.toUpperCase());
+            }
+            return "Interpolation";
+        },
+        oneditprepare: function () {
+            $("#node-input-filter_type").on("change", function () {
+                var val = $(this).val();
+                $("#row-zoom, #row-angle, #row-reshape, #row-shift_x, #row-shift_y").hide();
+                if (val === "zoom") $("#row-zoom").show();
+                else if (val === "rotate") { $("#row-angle").show(); $("#row-reshape").show(); }
+                else if (val === "shift") { $("#row-shift_x").show(); $("#row-shift_y").show(); }
+            }).change();
+        }
+    });
+</script>

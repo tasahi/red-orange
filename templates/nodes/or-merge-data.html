@@ -1,0 +1,72 @@
+<script type="text/javascript">
+    RED.nodes.registerType('or-merge-data', {
+        category: 'OR Transform',
+        color: '#FFD39F',
+        defaults: {
+            name: { value: "" },
+            merge_type: { value: "inner" },
+            key_attribute_1: { value: "" },
+            key_attribute_2: { value: "" }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "font-awesome/fa-link",
+        paletteLabel: "Merge Data",
+        label: function() {
+            return this.name || "Merge Data";
+        },
+        oneditprepare: function() {
+            const node = this;
+
+            // Add a "Preview Output" button
+            $('<hr>').appendTo('#dialog-form');
+            const previewBtn = $('<button type="button" class="ui-button ui-corner-all ui-widget">Preview Output (Data)</button>')
+                .appendTo('#dialog-form');
+            $('<div id="or-merge-preview" style="margin-top:10px; font-size:0.9em; color:#666;"></div>').appendTo('#dialog-form');
+
+            previewBtn.on("click", function() {
+                $.getJSON("orangered/preview/" + node.id + "/Data?rows=10", function(data) {
+                    if (data.error) {
+                        $('#or-merge-preview').html("<span style='color:red'>" + data.error + "</span>");
+                        return;
+                    }
+                    $('#or-merge-preview').html("<b>" + data.total_rows + "</b> rows &times; <b>" + data.total_cols + "</b> columns");
+                }).fail(function(jqxhr) {
+                    var msg = "Failed to fetch preview";
+                    try { msg = JSON.parse(jqxhr.responseText).error || msg; } catch(e) {}
+                    $('#or-merge-preview').html("<span style='color:red'>" + msg + "</span>");
+                });
+            });
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-merge-data">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-merge_type"><i class="fa fa-link"></i> Merge Type</label>
+        <select id="node-input-merge_type">
+            <option value="inner">Inner Join</option>
+            <option value="left">Left Join</option>
+            <option value="right">Right Join</option>
+            <option value="outer">Outer (Full) Join</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-key_attribute_1"><i class="fa fa-key"></i> Key Column (Data)</label>
+        <input type="text" id="node-input-key_attribute_1" placeholder="e.g. id">
+    </div>
+    <div class="form-row">
+        <label for="node-input-key_attribute_2"><i class="fa fa-key"></i> Key Column (Extra)</label>
+        <input type="text" id="node-input-key_attribute_2" placeholder="Same as above if empty">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-merge-data">
+    <p>Merges two datasets by matching rows on a key column (SQL-style join).</p>
+    <p>Connect the primary dataset to the <b>Data</b> input and the secondary dataset
+    to the <b>Extra Data</b> input.</p>
+</script>

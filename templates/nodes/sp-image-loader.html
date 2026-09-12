@@ -1,0 +1,29 @@
+<script type="text/html" data-template-name="sp-image-loader">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-file_path"><i class="fa fa-file"></i> File Path</label>
+        <input type="text" id="node-input-file_path" placeholder="/path/to/image.png">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('sp-image-loader', {
+        category: 'SP NDImage',
+        paletteLabel: "Image Loader",
+        color: '#a6cee3',
+        defaults: {
+            name: { value: "" },
+            file_path: { value: "" }
+        },
+        inputs: 0,
+        outputs: 1,
+        outputLabels: ["Image"],
+        icon: "font-awesome/fa-file-image-o",
+        label: function() {
+            return this.name || "Image Loader";
+        }
+    });
+</script>

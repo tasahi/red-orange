@@ -1,0 +1,130 @@
+<script type="text/javascript">
+    if (!window.orangeredTrackerLoaded) {
+        window.orangeredTrackerLoaded = true;
+        $.getScript("orangered/tracker-ui.js");
+    }
+
+    RED.nodes.registerType('or-linear-regression', {
+        category: 'OR Model',
+        color: '#FAC1D9',
+        defaults: {
+            name: { value: "" },
+            regularization: { value: "none" },
+            alpha: { value: 1.0 },
+            l1_ratio: { value: 0.5 },
+            fit_intercept: { value: true }
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: ["Learner", "Model"],
+        icon: "font-awesome/fa-line-chart",
+        paletteLabel: "Linear Regression",
+        label: function() {
+            return this.name || "Linear Regression";
+        },
+        oneditprepare: function() {
+            const node = this;
+
+            // Toggle regularization options
+            function updateRegFields() {
+                const reg = $("#node-input-regularization").val();
+                if (reg === "none") {
+                    $("#or-alpha-row").hide();
+                    $("#or-l1-ratio-row").hide();
+                } else if (reg === "elastic_net") {
+                    $("#or-alpha-row").show();
+                    $("#or-l1-ratio-row").show();
+                } else {
+                    $("#or-alpha-row").show();
+                    $("#or-l1-ratio-row").hide();
+                }
+            }
+
+            $("#node-input-regularization").on("change", updateRegFields);
+            updateRegFields();
+
+            $('<hr>').appendTo('#dialog-form');
+            
+            const coefBtn = $('<button type="button" class="ui-button ui-corner-all ui-widget">View Coefficients</button>')
+                .appendTo('#dialog-form')
+                .on("click", function() {
+                    $('#or-coef-container').html("Loading Coefficients...");
+                    $.getJSON("orangered/coefficients/" + node.id, function(data) {
+                        if (data.error) {
+                            $('#or-coef-container').html("<div style='color:red'>" + data.error + "</div>");
+                            return;
+                        }
+                        
+                        $('#or-coef-container').html("");
+                        
+                        const columns = [
+                            { title: "Feature", field: "feature" },
+                            { title: "Coefficient", field: "coef", formatter: "money", formatterParams: {symbol: "", precision: 4} }
+                        ];
+                        
+                        new Tabulator("#or-coef-container", {
+                            data: data.rows,
+                            layout: "fitColumns",
+                            columns: columns,
+                            height: "250px"
+                        });
+                    }).fail(function(jqxhr) {
+                        $('#or-coef-container').html("<div style='color:red'>Failed to fetch coefficients (Model might not be trained).</div>");
+                    });
+                });
+
+            $('<div id="or-coef-container" style="margin-top:10px; width:100%; min-height:50px;"></div>').appendTo('#dialog-form');
+
+            // Training history panel
+            if (window.orangeredTracker) {
+                window.orangeredTracker.buildPanel(this.id, '#dialog-form');
+            }
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-linear-regression">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-regularization"><i class="fa fa-sliders"></i> Regularization</label>
+        <select id="node-input-regularization" style="width:70%;">
+            <option value="none">None (Ordinary Least Squares)</option>
+            <option value="ridge">Ridge (L2 penalty)</option>
+            <option value="lasso">Lasso (L1 penalty)</option>
+            <option value="elastic_net">Elastic Net (L1 + L2)</option>
+        </select>
+    </div>
+    <div class="form-row" id="or-alpha-row">
+        <label for="node-input-alpha"><i class="fa fa-cog"></i> Alpha (λ)</label>
+        <input type="number" id="node-input-alpha" step="0.01" min="0.0001" style="width:70%;">
+    </div>
+    <div class="form-row" id="or-l1-ratio-row">
+        <label for="node-input-l1_ratio"><i class="fa fa-cog"></i> L1 Ratio</label>
+        <input type="number" id="node-input-l1_ratio" step="0.05" min="0" max="1" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-fit_intercept"><i class="fa fa-check"></i> Intercept</label>
+        <input type="checkbox" id="node-input-fit_intercept" style="display:inline-block; width:auto; vertical-align:top;">
+        <span style="font-size:12px; color:#666;">Fit intercept term</span>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-linear-regression">
+    <p>A linear regression learner and model supporting Ordinary Least Squares (OLS), Ridge, Lasso, and Elastic Net regularization.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>Data <span class="property-type">Orange.data.Table</span></dt>
+        <dd>Optional training dataset with a continuous target.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>Learner <span class="property-type">Orange.base.Learner</span></dt>
+        <dd>Unfitted regression learner for Test & Score.</dd>
+        <dt>Model <span class="property-type">Orange.base.Model</span></dt>
+        <dd>Trained linear regression model for Predictions.</dd>
+    </dl>
+</script>
+

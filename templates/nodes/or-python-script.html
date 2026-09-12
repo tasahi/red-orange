@@ -1,0 +1,121 @@
+<script type="text/javascript">
+(function() {
+    RED.nodes.registerType('or-python-script', {
+        category: 'OR Transform',
+        color: '#FFD39F',
+        defaults: {
+            name: { value: "" },
+            script: { value: "# Your Python code here\n# Available variables:\n#   in_data   — primary input table (Orange.data.Table or None)\n#   in_extra  — secondary input table (or None)\n#   in_object — any upstream Python object (or None)\n#\n# Assign results to:\n#   out_data   — Table to send downstream\n#   out_object — any Python object to send downstream\n#\n# Pre-imported: np (numpy), pd (pandas), Table, Domain\n# State: variables persist between executions\n\nout_data = in_data\n" }
+        },
+        inputs: 3,
+        inputLabels: ["Data", "Extra Data", "Object"],
+        outputs: 2,
+        outputLabels: ["Data", "Object"],
+        icon: "font-awesome/fa-code",
+        paletteLabel: "Python Script",
+        label: function() {
+            return this.name || "Python Script";
+        },
+        oneditprepare: function() {
+            var node = this;
+
+            // --- Code Editor ---
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-script-editor',
+                mode: 'ace/mode/python',
+                value: this.script || ""
+            });
+
+            // --- Console Output area ---
+            // Try to fetch last console output from the backend
+            $.getJSON("orangered/console/" + node.id, function(data) {
+                if (data && data.output) {
+                    $('#or-console-output').val(data.output);
+                } else {
+                    $('#or-console-output').val("(no output yet)");
+                }
+            }).fail(function() {
+                $('#or-console-output').val("(execute the workflow to see output)");
+            });
+        },
+        oneditsave: function() {
+            // Sync editor content back to the hidden input field
+            $("#node-input-script").val(this.editor.getValue());
+            this.script = this.editor.getValue();
+            this.editor.destroy();
+            delete this.editor;
+        },
+        oneditcancel: function() {
+            this.editor.destroy();
+            delete this.editor;
+        },
+        oneditresize: function(size) {
+            // Dynamically resize the editor when the dialog is resized
+            var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+            var height = size.height;
+            for (var i = 0; i < rows.length; i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-text-editor-row");
+            editorRow.css("height", Math.max(150, height - 120) + "px");
+            if (this.editor) {
+                this.editor.resize();
+            }
+        }
+    });
+})();
+</script>
+
+<script type="text/html" data-template-name="or-python-script">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+        <label style="width:100%;"><i class="fa fa-code"></i> Python Script</label>
+    </div>
+    <div class="form-row node-text-editor-row" style="position:relative;">
+        <div style="height:300px; min-height:150px;" class="node-text-editor" id="node-input-script-editor"></div>
+    </div>
+    <input type="hidden" id="node-input-script">
+
+    <div class="form-row">
+        <label style="width:100%;"><i class="fa fa-terminal"></i> Console Output</label>
+    </div>
+    <div class="form-row">
+        <textarea id="or-console-output" readonly
+                  style="width:100%; height:100px; font-family:monospace; font-size:12px;
+                         background:#1e1e1e; color:#d4d4d4; border:1px solid #444;
+                         padding:8px; resize:vertical; border-radius:4px;">
+        </textarea>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-python-script">
+    <p>Execute arbitrary Python code against the input data, like a Jupyter notebook cell.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>in_data <span class="property-type">Orange.data.Table</span></dt>
+        <dd>The primary dataset from the upstream node.</dd>
+        <dt>in_extra <span class="property-type">Orange.data.Table</span></dt>
+        <dd>An optional secondary dataset.</dd>
+        <dt>in_object <span class="property-type">object</span></dt>
+        <dd>Any Python object from an upstream Python Script node (state passing).</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>out_data <span class="property-type">Orange.data.Table</span></dt>
+        <dd>Assign your result table to this variable.</dd>
+        <dt>out_object <span class="property-type">object</span></dt>
+        <dd>Assign any Python object here to pass state to downstream nodes.</dd>
+    </dl>
+    <h3>Pre-imported Libraries</h3>
+    <ul>
+        <li><code>np</code> (NumPy)</li>
+        <li><code>pd</code> (Pandas)</li>
+        <li><code>Table</code>, <code>Domain</code>, <code>ContinuousVariable</code>, <code>DiscreteVariable</code>, <code>StringVariable</code> (Orange)</li>
+    </ul>
+    <h3>State Variables</h3>
+    <p>Variables created in your script <strong>persist between executions</strong>, just like cells in a Jupyter notebook. This means you can define helper functions or counters in one execution and use them in the next.</p>
+</script>

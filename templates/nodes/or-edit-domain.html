@@ -1,0 +1,73 @@
+<script type="text/javascript">
+    RED.nodes.registerType('or-edit-domain', {
+        category: 'OR Data',
+        color: '#FFD39F',
+        defaults: {
+            name: { value: "" },
+            retype: { value: "{}" },
+            rename: { value: "{}" },
+            set_target: { value: "" }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "font-awesome/fa-pencil-square-o",
+        paletteLabel: "Edit Domain",
+        label: function() {
+            return this.name || "Edit Domain";
+        },
+        oneditprepare: function() {
+            const node = this;
+            $('<hr>').appendTo('#dialog-form');
+            $('<div style="margin-top:5px; font-size:0.85em; color:#888;"><i class="fa fa-info-circle"></i> <b>Retype</b> and <b>Rename</b> use JSON objects mapping column names.<br>Example retype: <code>{"zip_code": "discrete"}</code><br>Example rename: <code>{"old_name": "new_name"}</code></div>').appendTo('#dialog-form');
+
+            $('<hr>').appendTo('#dialog-form');
+            const previewBtn = $('<button type="button" class="ui-button ui-corner-all ui-widget">Preview Output (Data)</button>')
+                .appendTo('#dialog-form');
+            $('<div id="or-edit-preview" style="margin-top:10px; font-size:0.9em; color:#666;"></div>').appendTo('#dialog-form');
+
+            previewBtn.on("click", function() {
+                $.getJSON("orangered/preview/" + node.id + "/Data?rows=10", function(data) {
+                    if (data.error) {
+                        $('#or-edit-preview').html("<span style='color:red'>" + data.error + "</span>");
+                        return;
+                    }
+                    var info = "<b>" + data.total_rows + "</b> rows &times; <b>" + data.total_cols + "</b> columns<br>";
+                    info += "<b>Attributes:</b> " + data.schema.attributes.map(function(v) { return v.name + " (" + v.var_type + ")"; }).join(", ") + "<br>";
+                    if (data.schema.class_vars.length > 0) {
+                        info += "<b>Target:</b> " + data.schema.class_vars.map(function(v) { return v.name + " (" + v.var_type + ")"; }).join(", ");
+                    }
+                    $('#or-edit-preview').html(info);
+                }).fail(function(jqxhr) {
+                    var msg = "Failed to fetch preview";
+                    try { msg = JSON.parse(jqxhr.responseText).error || msg; } catch(e) {}
+                    $('#or-edit-preview').html("<span style='color:red'>" + msg + "</span>");
+                });
+            });
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-edit-domain">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-retype"><i class="fa fa-exchange"></i> Retype (JSON)</label>
+        <input type="text" id="node-input-retype" placeholder='{"col": "discrete"}'>
+    </div>
+    <div class="form-row">
+        <label for="node-input-rename"><i class="fa fa-i-cursor"></i> Rename (JSON)</label>
+        <input type="text" id="node-input-rename" placeholder='{"old_name": "new_name"}'>
+    </div>
+    <div class="form-row">
+        <label for="node-input-set_target"><i class="fa fa-bullseye"></i> Set Target</label>
+        <input type="text" id="node-input-set_target" placeholder="Column name to use as target">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-edit-domain">
+    <p>Change variable types, rename columns, or designate a target variable.</p>
+    <p><b>Retype:</b> JSON object mapping column names to new types (<code>continuous</code>, <code>discrete</code>, <code>string</code>).</p>
+    <p><b>Set Target:</b> Name of the column to designate as the class (target) variable.</p>
+</script>

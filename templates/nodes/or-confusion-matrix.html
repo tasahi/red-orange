@@ -1,0 +1,152 @@
+<script type="text/javascript">
+    if (!window.plotlyLoaded) {
+        window.plotlyLoaded = true;
+        const script = document.createElement("script");
+        script.src = "https://cdn.plot.ly/plotly-2.30.0.min.js";
+        document.head.appendChild(script);
+    }
+
+    RED.nodes.registerType('or-confusion-matrix', {
+        category: 'OR Evaluate',
+        color: '#C3F3F3',
+        defaults: {
+            name: { value: "" },
+            source_node: { value: "" }
+        },
+        inputs: 1,
+        outputs: 0,
+        icon: "font-awesome/fa-th",
+        paletteLabel: "Confusion Matrix",
+        label: function() {
+            return this.name || "Confusion Matrix";
+        },
+        oneditprepare: function() {
+            const node = this;
+            $('<hr>').appendTo('#dialog-form');
+
+            // Populate source_node dropdown with Test & Score nodes
+            const sourceSelect = $('#node-input-source_node');
+            RED.nodes.eachNode(function(n) {
+                if (n.type === "or-test-and-score") {
+                    sourceSelect.append($('<option>', {
+                        value: n.id,
+                        text: n.name || "Test and Score (" + n.id.substring(0, 6) + ")"
+                    }));
+                }
+            });
+            if (node.source_node) {
+                sourceSelect.val(node.source_node);
+            }
+
+            const renderBtn = $('<button type="button" class="ui-button ui-corner-all ui-widget">Render Confusion Matrix</button>')
+                .appendTo('#dialog-form');
+
+            $('<div id="or-cm-container" style="width:100%; min-height:300px; margin-top:10px;"></div>').appendTo('#dialog-form');
+
+            if (node.source_node) {
+                setTimeout(function() { renderBtn.click(); }, 100);
+            }
+
+            renderBtn.on("click", function() {
+                const srcId = $('#node-input-source_node').val();
+                if (!srcId) {
+                    $('#or-cm-container').html("<div style='color:red'>Please select a Test & Score node.</div>");
+                    return;
+                }
+                $('#or-cm-container').html("Loading...");
+
+                $.getJSON("orangered/metrics/" + srcId, function(data) {
+                    if (data.error) {
+                        $('#or-cm-container').html("<div style='color:red'>" + data.error + "</div>");
+                        return;
+                    }
+
+                    $('#or-cm-container').html("");
+
+                    if (!data.class_names || data.class_names.length === 0) {
+                        $('#or-cm-container').html("<div style='color:orange'>No confusion matrix available (regression task?).</div>");
+                        return;
+                    }
+
+                    // Render one heatmap per learner
+                    for (const [learner, matrix] of Object.entries(data.confusion_matrix)) {
+                        const divId = "cm-standalone-" + learner.replace(/\s+/g, '-');
+                        $('<div id="' + divId + '" style="width:100%; height:350px; margin-bottom:15px;"></div>').appendTo('#or-cm-container');
+
+                        const zData = [...matrix].reverse();
+                        const yLabels = [...data.class_names].reverse();
+
+                        // Compute annotations (cell values)
+                        var annotations = [];
+                        for (var i = 0; i < zData.length; i++) {
+                            for (var j = 0; j < zData[i].length; j++) {
+                                annotations.push({
+                                    x: data.class_names[j],
+                                    y: yLabels[i],
+                                    text: String(zData[i][j]),
+                                    font: { color: zData[i][j] > (Math.max(...matrix.flat()) / 2) ? 'white' : 'black', size: 16 },
+                                    showarrow: false
+                                });
+                            }
+                        }
+
+                        var trace = {
+                            z: zData,
+                            x: data.class_names,
+                            y: yLabels,
+                            type: 'heatmap',
+                            colorscale: 'Blues',
+                            showscale: true,
+                            hoverinfo: "x+y+z"
+                        };
+
+                        Plotly.newPlot(divId, [trace], {
+                            title: learner,
+                            xaxis: { title: 'Predicted', side: 'bottom' },
+                            yaxis: { title: 'Actual' },
+                            annotations: annotations,
+                            margin: { t: 50, l: 80, r: 40, b: 60 }
+                        });
+                    }
+
+                    // Also show score summary
+                    var summaryHtml = '<div style="margin-top:10px; padding:8px; background:#f5f5f5; border-radius:4px;">';
+                    summaryHtml += '<b>Scores:</b><br>';
+                    data.learners.forEach(function(learner, i) {
+                        summaryHtml += '<b>' + learner + ':</b> ';
+                        var parts = [];
+                        for (var metric in data.scores) {
+                            parts.push(metric + '=' + data.scores[metric][i].toFixed(3));
+                        }
+                        summaryHtml += parts.join(', ') + '<br>';
+                    });
+                    summaryHtml += '</div>';
+                    $(summaryHtml).appendTo('#or-cm-container');
+
+                }).fail(function(jqxhr) {
+                    var msg = "Failed to fetch metrics";
+                    try { msg = JSON.parse(jqxhr.responseText).error || msg; } catch(e) {}
+                    $('#or-cm-container').html("<div style='color:red'>" + msg + "</div>");
+                });
+            });
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-confusion-matrix">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-source_node"><i class="fa fa-th"></i> Source Node</label>
+        <select id="node-input-source_node">
+            <option value="">-- Select Test & Score --</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-confusion-matrix">
+    <p>Displays a confusion matrix heatmap for each learner evaluated by a <b>Test & Score</b> node.</p>
+    <p>Select the Test & Score node from the dropdown, deploy, and click <b>Render Confusion Matrix</b>.</p>
+</script>

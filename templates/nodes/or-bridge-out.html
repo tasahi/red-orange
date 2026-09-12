@@ -1,0 +1,28 @@
+<script type="text/javascript">
+    RED.nodes.registerType('or-bridge-out', {
+        category: 'Bridge',
+        color: '#E2D96E',
+        defaults: {
+            name: { value: "" }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "bridge.svg",
+        paletteLabel: "Node-RED Out",
+        label: function() {
+            return this.name || "Node-RED Out";
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-bridge-out">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-bridge-out">
+    <p>Converts an OrangeRed Table into a native Node-RED <code>msg.payload</code> (JSON array).</p>
+    <p>When the upstream OrangeRed workflow finishes executing, this node will fetch the resulting data and automatically send it to its output.</p>
+</script>

@@ -1,0 +1,106 @@
+<script type="text/javascript">
+    if (!window.plotlyLoaded) {
+        window.plotlyLoaded = true;
+        const script = document.createElement("script");
+        script.src = "https://cdn.plot.ly/plotly-2.30.0.min.js";
+        document.head.appendChild(script);
+    }
+
+    RED.nodes.registerType('or-histogram', {
+        category: 'OR Visualize',
+        color: '#FFB7B1',
+        defaults: {
+            name: { value: "" }
+        },
+        inputs: 1,
+        outputs: 0,
+        icon: "font-awesome/fa-bar-chart",
+        paletteLabel: "Histogram",
+        label: function() {
+            return this.name || "Histogram";
+        },
+        oneditprepare: function() {
+            const node = this;
+            $('<hr>').appendTo('#dialog-form');
+            
+            // UI Controls
+            const controls = $('<div style="display:flex; gap:10px; margin-bottom:10px;"></div>').appendTo('#dialog-form');
+            controls.append('<label>Variable <select id="or-hist-x"></select></label>');
+            controls.append('<label>Group By <select id="or-hist-c"></select></label>');
+            
+            const renderBtn = $('<button type="button" class="ui-button ui-corner-all ui-widget">Render Histogram</button>')
+                .appendTo('#dialog-form');
+                
+            $('<div id="or-hist-container" style="width:100%; height:400px; margin-top:10px;"></div>').appendTo('#dialog-form');
+
+            let currentData = null;
+
+            $.getJSON("orangered/preview/" + node.id + "/Data?rows=500", function(data) {
+                if (data.error) {
+                    $('#or-hist-container').html("<div style='color:red'>" + data.error + "</div>");
+                    return;
+                }
+                currentData = data;
+                
+                const allVars = [...data.schema.attributes, ...data.schema.class_vars, ...data.schema.metas];
+                const xSelect = $('#or-hist-x');
+                const cSelect = $('#or-hist-c');
+                
+                cSelect.append($('<option>', {value: "", text: "None"}));
+                
+                allVars.forEach(v => {
+                    xSelect.append($('<option>', {value: v.name, text: v.name}));
+                    cSelect.append($('<option>', {value: v.name, text: v.name}));
+                });
+                
+                if (node.xVariable) xSelect.val(node.xVariable);
+                else if (allVars.length > 0) xSelect.val(allVars[0].name);
+                
+                if (node.colorGroup) cSelect.val(node.colorGroup);
+                else if (data.schema.class_vars.length > 0) cSelect.val(data.schema.class_vars[0].name);
+                
+                renderHist();
+            });
+
+            renderBtn.on("click", renderHist);
+
+            function renderHist() {
+                if (!currentData || !window.Plotly) return;
+                
+                const xVar = $('#or-hist-x').val();
+                const cVar = $('#or-hist-c').val();
+                
+                if (!cVar) {
+                    const xData = currentData.rows.map(r => r[xVar]);
+                    Plotly.newPlot('or-hist-container', [{
+                        x: xData,
+                        type: 'histogram'
+                    }], { title: `Distribution of ${xVar}` });
+                } else {
+                    const uniqueVals = [...new Set(currentData.rows.map(r => r[cVar]))];
+                    const traces = uniqueVals.map(val => ({
+                        name: String(val),
+                        x: currentData.rows.filter(r => r[cVar] === val).map(r => r[xVar]),
+                        type: 'histogram',
+                        opacity: 0.6
+                    }));
+                    Plotly.newPlot('or-hist-container', traces, {
+                        title: `Distribution of ${xVar} grouped by ${cVar}`,
+                        barmode: 'overlay'
+                    });
+                }
+            }
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-histogram">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-histogram">
+    <p>Displays a distribution histogram using Plotly.js.</p>
+</script>

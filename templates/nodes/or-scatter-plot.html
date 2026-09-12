@@ -1,0 +1,148 @@
+<script type="text/javascript">
+    if (!window.plotlyLoaded) {
+        window.plotlyLoaded = true;
+        const script = document.createElement("script");
+        script.src = "https://cdn.plot.ly/plotly-2.30.0.min.js";
+        document.head.appendChild(script);
+    }
+
+    RED.nodes.registerType('or-scatter-plot', {
+        category: 'OR Visualize',
+        color: '#FFB7B1',
+        defaults: {
+            name: { value: "" }
+        },
+        inputs: 1,
+        outputs: 0,
+        icon: "font-awesome/fa-line-chart",
+        paletteLabel: "Scatter Plot",
+        label: function() {
+            return this.name || "Scatter Plot";
+        },
+        oneditprepare: function() {
+            const node = this;
+            $('<hr>').appendTo('#dialog-form');
+            
+            // UI Controls
+            const controls = $('<div style="display:flex; gap:10px; margin-bottom:10px;"></div>').appendTo('#dialog-form');
+            controls.append('<label>X Axis <select id="or-plot-x"></select></label>');
+            controls.append('<label>Y Axis <select id="or-plot-y"></select></label>');
+            controls.append('<label>Color <select id="or-plot-c"></select></label>');
+            
+            const renderBtn = $('<button type="button" class="ui-button ui-corner-all ui-widget">Render Plot</button>')
+                .appendTo('#dialog-form');
+                
+            $('<div id="or-plot-container" style="width:100%; height:400px; margin-top:10px;"></div>').appendTo('#dialog-form');
+
+            let currentData = null;
+
+            // Fetch data initially
+            $.getJSON("orangered/preview/" + node.id + "/Data?rows=500", function(data) {
+                if (data.error) {
+                    $('#or-plot-container').html("<div style='color:red'>" + data.error + "</div>");
+                    return;
+                }
+                currentData = data;
+                
+                // Populate dropdowns
+                const allVars = [...data.schema.attributes, ...data.schema.class_vars, ...data.schema.metas];
+                const xSelect = $('#or-plot-x');
+                const ySelect = $('#or-plot-y');
+                const cSelect = $('#or-plot-c');
+                
+                cSelect.append($('<option>', {value: "", text: "None"}));
+                
+                allVars.forEach(v => {
+                    xSelect.append($('<option>', {value: v.name, text: v.name}));
+                    ySelect.append($('<option>', {value: v.name, text: v.name}));
+                    cSelect.append($('<option>', {value: v.name, text: v.name}));
+                });
+                
+                // Set defaults
+                if (node.xVariable) xSelect.val(node.xVariable);
+                else if (allVars.length > 0) xSelect.val(allVars[0].name);
+                
+                if (node.yVariable) ySelect.val(node.yVariable);
+                else if (allVars.length > 1) ySelect.val(allVars[1].name);
+                
+                if (node.colorGroup) cSelect.val(node.colorGroup);
+                else if (data.schema.class_vars.length > 0) cSelect.val(data.schema.class_vars[0].name);
+
+                
+                renderPlot();
+            }).fail(function(jqxhr) {
+                let errMsg = jqxhr.responseText;
+                try {
+                    errMsg = JSON.parse(jqxhr.responseText).error || errMsg;
+                } catch(e) {}
+                $('#or-plot-container').html("<div style='color:red'>Failed to fetch preview: " + errMsg + "</div>");
+            });
+
+            renderBtn.on("click", renderPlot);
+
+            function renderPlot() {
+                if (!currentData || !window.Plotly) return;
+                
+                const xVar = $('#or-plot-x').val();
+                const yVar = $('#or-plot-y').val();
+                const cVar = $('#or-plot-c').val();
+                
+                const xData = currentData.rows.map(r => r[xVar]);
+                const yData = currentData.rows.map(r => r[yVar]);
+                
+                let trace = {
+                    x: xData,
+                    y: yData,
+                    mode: 'markers',
+                    type: 'scatter',
+                    marker: { size: 8, opacity: 0.7 }
+                };
+
+                if (cVar) {
+                    const cData = currentData.rows.map(r => r[cVar]);
+                    trace.marker.color = cData;
+                    // If discrete, map colors
+                    const spec = [...currentData.schema.attributes, ...currentData.schema.class_vars, ...currentData.schema.metas].find(v => v.name === cVar);
+                    if (spec && spec.var_type === 'discrete') {
+                        // Plotly auto-colors discrete strings if we pass them as color? Actually Plotly works better if we split into multiple traces for legend.
+                        const uniqueVals = [...new Set(cData)];
+                        const traces = uniqueVals.map(val => ({
+                            name: String(val),
+                            x: currentData.rows.filter(r => r[cVar] === val).map(r => r[xVar]),
+                            y: currentData.rows.filter(r => r[cVar] === val).map(r => r[yVar]),
+                            mode: 'markers',
+                            type: 'scatter',
+                            marker: { size: 8 }
+                        }));
+                        Plotly.newPlot('or-plot-container', traces, {
+                            title: `${yVar} vs ${xVar}`,
+                            xaxis: { title: xVar },
+                            yaxis: { title: yVar }
+                        });
+                        return;
+                    } else {
+                        trace.marker.colorscale = 'Viridis';
+                        trace.marker.showscale = true;
+                    }
+                }
+
+                Plotly.newPlot('or-plot-container', [trace], {
+                    title: `${yVar} vs ${xVar}`,
+                    xaxis: { title: xVar },
+                    yaxis: { title: yVar }
+                });
+            }
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-scatter-plot">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-scatter-plot">
+    <p>Displays a 2D scatter plot using Plotly.js.</p>
+</script>

@@ -1,0 +1,29 @@
+<script type="text/html" data-template-name="sp-image-saver">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-file_path"><i class="fa fa-save"></i> Save Path</label>
+        <input type="text" id="node-input-file_path" placeholder="/path/to/save.png">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('sp-image-saver', {
+        category: 'SP NDImage',
+        paletteLabel: "Image Saver",
+        color: '#fb9a99',
+        defaults: {
+            name: { value: "" },
+            file_path: { value: "" }
+        },
+        inputs: 1,
+        outputs: 0,
+        inputLabels: ["Image"],
+        icon: "font-awesome/fa-save",
+        label: function() {
+            return this.name || "Image Saver";
+        }
+    });
+</script>

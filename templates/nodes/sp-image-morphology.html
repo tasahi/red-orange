@@ -1,0 +1,52 @@
+<script type="text/html" data-template-name="sp-image-morphology">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-filter_type"><i class="fa fa-filter"></i> Filter</label>
+        <select id="node-input-filter_type">
+            <option value="binary_dilation">Binary Dilation</option>
+            <option value="binary_erosion">Binary Erosion</option>
+            <option value="binary_opening">Binary Opening</option>
+            <option value="binary_closing">Binary Closing</option>
+            <option value="morphological_gradient">Morphological Gradient</option>
+        </select>
+    </div>
+    <div class="form-row" id="row-iterations">
+        <label for="node-input-iterations"><i class="fa fa-repeat"></i> Iterations</label>
+        <input type="number" id="node-input-iterations" step="1" value="1">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('sp-image-morphology', {
+        category: 'SP NDImage',
+        paletteLabel: "Im.Morphology",
+        color: '#fb8072',
+        defaults: {
+            name: { value: "" },
+            filter_type: { value: "binary_dilation" },
+            iterations: { value: 1 }
+        },
+        inputs: 1,
+        outputs: 1,
+        inputLabels: ["Image"],
+        outputLabels: ["Image"],
+        icon: "font-awesome/fa-object-group",
+        label: function () {
+            if (this.name) { return this.name; }
+            if (this.filter_type) {
+                return this.filter_type.replace(/_/g, ' ').replace(/\w/g, l => l.toUpperCase());
+            }
+            return "Morphology";
+        },
+        oneditprepare: function () {
+            $("#node-input-filter_type").on("change", function () {
+                var val = $(this).val();
+                if (val === "morphological_gradient") $("#row-iterations").hide();
+                else $("#row-iterations").show();
+            }).change();
+        }
+    });
+</script>

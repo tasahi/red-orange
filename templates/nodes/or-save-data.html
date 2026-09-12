@@ -1,0 +1,38 @@
+<script type="text/javascript">
+    RED.nodes.registerType('or-save-data', {
+        category: 'OR Data',
+        color: '#FFD39F',
+        defaults: {
+            name: { value: "" },
+            file_path: { value: "" }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "font-awesome/fa-floppy-o",
+        paletteLabel: "Save Data",
+        label: function() {
+            return this.name || "Save Data";
+        },
+        oneditprepare: function() {
+            const node = this;
+            $('<hr>').appendTo('#dialog-form');
+            $('<div style="margin-top:5px; font-size:0.85em; color:#888;"><i class="fa fa-info-circle"></i> Supported formats: .csv, .tsv, .tab, .xlsx, .parquet, .json</div>').appendTo('#dialog-form');
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-save-data">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-file_path"><i class="fa fa-floppy-o"></i> Output Path</label>
+        <input type="text" id="node-input-file_path" placeholder="e.g. E:\output\results.csv">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-save-data">
+    <p>Saves the input data to a file on disk. Data also passes through to the output port.</p>
+    <p>Supported formats: CSV, TSV, TAB, XLSX, Parquet, JSON.</p>
+</script>

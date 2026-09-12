@@ -1,0 +1,90 @@
+<script type="text/javascript">
+    if (!window.orangeredTrackerLoaded) {
+        window.orangeredTrackerLoaded = true;
+        $.getScript("orangered/tracker-ui.js");
+    }
+
+    RED.nodes.registerType('or-logistic-regression', {
+        category: 'OR Model',
+        color: '#FAC1D9',
+        defaults: {
+            name: { value: "" },
+            penalty: { value: "l2" },
+            C: { value: 1.0 }
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: ["Learner", "Model"],
+        icon: "font-awesome/fa-line-chart", // TODO better icon
+        paletteLabel: "Logistic Regression",
+        label: function() {
+            return this.name || "Logistic Regression";
+        },
+        oneditprepare: function() {
+            const node = this;
+            $('<hr>').appendTo('#dialog-form');
+            
+            const coefBtn = $('<button type="button" class="ui-button ui-corner-all ui-widget">View Coefficients</button>')
+                .appendTo('#dialog-form')
+                .on("click", function() {
+                    $('#or-coef-container').html(`Loading Coefficients...`);
+                    $.getJSON("orangered/coefficients/" + node.id, function(data) {
+                        if (data.error) {
+                            $('#or-coef-container').html("<div style='color:red'>" + data.error + "</div>");
+                            return;
+                        }
+                        
+                        $('#or-coef-container').html("");
+                        
+                        const columns = [];
+                        if (data.rows.length > 0 && data.rows[0].class !== undefined) {
+                            columns.push({ title: "Class", field: "class" });
+                        }
+                        columns.push({ title: "Feature", field: "feature" });
+                        columns.push({ title: "Coefficient", field: "coef", formatter: "money", formatterParams: {symbol: "", precision: 4} });
+                        
+                        new Tabulator("#or-coef-container", {
+                            data: data.rows,
+                            layout: "fitColumns",
+                            columns: columns,
+                            height: "250px"
+                        });
+                    }).fail(function(jqxhr) {
+                        $('#or-coef-container').html("<div style='color:red'>Failed to fetch coefficients (Model might not be trained).</div>");
+                    });
+                });
+
+            $('<div id="or-coef-container" style="margin-top:10px; width:100%; min-height:50px;"></div>').appendTo('#dialog-form');
+
+            // Training history panel
+            if (window.orangeredTracker) {
+                window.orangeredTracker.addHistoryPanel(node);
+            }
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-logistic-regression">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-penalty"><i class="fa fa-cog"></i> Penalty</label>
+        <select id="node-input-penalty">
+            <option value="l2">Ridge (L2)</option>
+            <option value="l1">Lasso (L1)</option>
+            <option value="none">None</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-C"><i class="fa fa-sliders"></i> C (Strength)</label>
+        <input type="number" id="node-input-C" step="0.1" placeholder="1.0">
+    </div>
+    
+    <!-- TODO: Implement dedicated or-model-summary node as requested by user later -->
+</script>
+
+<script type="text/html" data-help-name="or-logistic-regression">
+    <p>Logistic Regression classification algorithm with LASSO (L1) or Ridge (L2) regularization.</p>
+</script>

@@ -1,0 +1,85 @@
+<script type="text/javascript">
+    RED.nodes.registerType('or-kmeans', {
+        category: 'OR Unsupervised',
+        color: '#CAE1EF',
+        defaults: {
+            name: { value: "" },
+            n_clusters: { value: 3 },
+            maxIterations: { value: 300 },
+            nInit: { value: 10 },
+            initMethod: { value: "k-means++" }
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: ["Annotated Data", "Centroids"],
+        icon: "font-awesome/fa-object-group",
+        paletteLabel: "k-Means",
+        label: function() {
+            return this.name || "k-Means";
+        },
+        oneditprepare: function() {
+            const node = this;
+            $('<hr>').appendTo('#dialog-form');
+
+            const previewBtn = $('<button type="button" class="ui-button ui-corner-all ui-widget">Preview Annotated Data</button>')
+                .appendTo('#dialog-form');
+            $('<div id="or-km-preview" style="margin-top:10px; font-size:0.9em; color:#666;"></div>').appendTo('#dialog-form');
+
+            previewBtn.on("click", function() {
+                $.getJSON("orangered/preview/" + node.id + "/Annotated Data?rows=10", function(data) {
+                    if (data.error) {
+                        $('#or-km-preview').html("<span style='color:red'>" + data.error + "</span>");
+                        return;
+                    }
+                    var info = "<b>" + data.total_rows + "</b> rows &times; <b>" + data.total_cols + "</b> columns";
+                    // Show cluster distribution from metas
+                    var clusterSpec = data.schema.metas.find(function(m) { return m.name === "Cluster"; });
+                    if (clusterSpec && clusterSpec.values) {
+                        info += "<br><b>Clusters:</b> " + clusterSpec.values.join(", ");
+                    }
+                    $('#or-km-preview').html(info);
+                }).fail(function(jqxhr) {
+                    var msg = "Failed to fetch preview";
+                    try { msg = JSON.parse(jqxhr.responseText).error || msg; } catch(e) {}
+                    $('#or-km-preview').html("<span style='color:red'>" + msg + "</span>");
+                });
+            });
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-kmeans">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-n_clusters"><i class="fa fa-object-group"></i> Number of Clusters (k)</label>
+        <input type="number" id="node-input-n_clusters" placeholder="3" min="2" max="50">
+    </div>
+    <div class="form-row">
+        <label for="node-input-maxIterations"><i class="fa fa-repeat"></i> Max Iterations</label>
+        <input type="number" id="node-input-maxIterations" placeholder="300" min="1">
+    </div>
+    <div class="form-row">
+        <label for="node-input-nInit"><i class="fa fa-refresh"></i> Restarts (n_init)</label>
+        <input type="number" id="node-input-nInit" placeholder="10" min="1">
+    </div>
+    <div class="form-row">
+        <label for="node-input-initMethod"><i class="fa fa-play"></i> Initialization</label>
+        <select id="node-input-initMethod">
+            <option value="k-means++">k-Means++</option>
+            <option value="random">Random</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-kmeans">
+    <p>k-Means clustering groups data into <b>k</b> clusters based on feature similarity.</p>
+    <p>Outputs:</p>
+    <ul>
+        <li><b>Annotated Data</b>: the input table with a new "Cluster" column</li>
+        <li><b>Centroids</b>: a table of cluster center coordinates</li>
+    </ul>
+    <p>Connect the <b>Annotated Data</b> output to a Scatter Plot and use "Cluster" as the color variable to visualize.</p>
+</script>

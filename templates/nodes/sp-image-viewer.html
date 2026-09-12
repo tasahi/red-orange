@@ -1,0 +1,105 @@
+<script type="text/html" data-template-name="sp-image-viewer">
+    <div class="form-row">
+        <ul style="background: #fff; min-width: 600px; margin-bottom: 20px;" id="node-dialog-tabs"></ul>
+    </div>
+    <div id="node-dialog-tab-content" style="min-height: 300px;">
+        <!-- Settings Tab -->
+        <div id="tab-settings" style="display:none">
+            <div class="form-row">
+                <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+                <input type="text" id="node-input-name" placeholder="Name">
+            </div>
+            <div class="form-row">
+                <label for="node-input-auto_refresh"><i class="fa fa-refresh"></i> Auto Refresh</label>
+                <input type="checkbox" id="node-input-auto_refresh" style="width:auto; margin-top:0;">
+                <span style="font-size: 0.9em; color: #888; margin-left: 5px;">Fetch latest image when preview opens</span>
+            </div>
+        </div>
+        <!-- Preview Tab -->
+        <div id="tab-preview" style="display:none; text-align:center;">
+            <div style="margin-bottom: 10px; text-align: right;">
+                <button type="button" class="red-ui-button" id="refresh-preview-btn"><i class="fa fa-refresh"></i> Refresh</button>
+            </div>
+            <img id="preview-image" style="max-width: 100%; max-height: 400px; border: 1px solid #ccc; display: none;" />
+            <div id="preview-loading" style="padding: 20px;">Loading image...</div>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="sp-image-viewer">
+    <p>Displays the image from the incoming xarray.DataArray.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('sp-image-viewer', {
+        category: 'SP NDImage',
+        paletteLabel: "Image Viewer",
+        color: '#fdbf6f',
+        defaults: {
+            name: { value: "" },
+            auto_refresh: { value: false }
+        },
+        inputs: 1,
+        outputs: 1,
+        inputLabels: ["Image"],
+        outputLabels: ["Image"],
+        icon: "font-awesome/fa-picture-o",
+        label: function() {
+            return this.name || "Image Viewer";
+        },
+        oneditprepare: function() {
+            var tabs = RED.tabs.create({
+                id: "node-dialog-tabs",
+                onchange: function(tab) {
+                    $("#node-dialog-tab-content").children().hide();
+                    $("#" + tab.id).show();
+                    if (tab.id === "tab-preview") {
+                        var auto = $("#node-input-auto_refresh").prop("checked");
+                        loadPreviewImage(auto);
+                    }
+                }
+            });
+            tabs.addTab({
+                id: "tab-settings",
+                label: "Settings"
+            });
+            tabs.addTab({
+                id: "tab-preview",
+                label: "Image Preview"
+            });
+            
+            setTimeout(function() { tabs.resize(); }, 0);
+            
+            var node = this;
+            var nodeId = this.id;
+            
+            if (!node._imageTimestamp) {
+                node._imageTimestamp = new Date().getTime();
+            }
+            
+            $("#refresh-preview-btn").click(function(e) {
+                e.preventDefault();
+                loadPreviewImage(true);
+            });
+            
+            function loadPreviewImage(forceRefresh) {
+                if (forceRefresh) {
+                    node._imageTimestamp = new Date().getTime();
+                }
+                var imgUrl = 'orangered/image/' + nodeId + '/Image?t=' + node._imageTimestamp;
+                $("#preview-loading").show();
+                $("#preview-image").hide();
+                
+                var img = new Image();
+                img.onload = function() {
+                    $("#preview-loading").hide();
+                    $("#preview-image").attr("src", imgUrl).show();
+                };
+                img.onerror = function() {
+                    $("#preview-loading").text("Error: Image not available or workflow not executed yet.");
+                };
+                img.src = imgUrl;
+            }
+        }
+    });
+</script>

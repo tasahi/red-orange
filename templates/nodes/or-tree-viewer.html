@@ -1,0 +1,179 @@
+<script type="text/javascript">
+    RED.nodes.registerType('or-tree-viewer', {
+        category: 'OR Visualize',
+        color: '#FFB7B1',
+        defaults: {
+            name: { value: "" },
+            sourceNode: { value: "" },
+            maxDepth: { value: 100 }
+        },
+        inputs: 1,
+        outputs: 0,
+        icon: "font-awesome/fa-eye",
+        paletteLabel: "Tree Viewer",
+        label: function() {
+            return this.name || "Tree Viewer";
+        },
+        oneditprepare: function() {
+            if (!window.d3Loaded) {
+                window.d3Loaded = true;
+                const script = document.createElement("script");
+                script.src = "https://d3js.org/d3.v7.min.js";
+                document.head.appendChild(script);
+            }
+
+            const node = this;
+            $('<hr>').appendTo('#dialog-form');
+
+            const sourceSelect = $('#node-input-sourceNode');
+            RED.nodes.eachNode(function(n) {
+                if (n.type === "or-tree" || n.type === "or-random-forest") {
+                    sourceSelect.append($('<option>', {
+                        value: n.id,
+                        text: (n.name || n.type.replace('or-', '')) + " (" + n.id.substring(0, 6) + ")"
+                    }));
+                }
+            });
+            if (node.sourceNode) {
+                sourceSelect.val(node.sourceNode);
+            }
+
+            const renderBtn = $('<button type="button" class="ui-button ui-corner-all ui-widget">Render Tree</button>')
+                .appendTo('#dialog-form');
+
+            $('<div id="or-tree-container" style="width:100%; height:500px; overflow:auto; margin-top:10px; background:#fff; border:1px solid #ccc; border-radius:4px;"></div>').appendTo('#dialog-form');
+
+            if (node.sourceNode) {
+                setTimeout(function() { renderBtn.click(); }, 100);
+            }
+
+            renderBtn.on("click", function() {
+                const srcId = $('#node-input-sourceNode').val();
+                const maxDepth = $('#node-input-maxDepth').val() || 100;
+
+                if (!srcId) {
+                    $('#or-tree-container').html("<div style='color:red; padding:10px;'>Please select a Tree model node.</div>");
+                    return;
+                }
+                
+                $('#or-tree-container').html("<div style='padding:10px;'>Loading tree structure...</div>");
+
+                $.getJSON("orangered/tree/" + srcId + "?max_depth=" + maxDepth, function(treeData) {
+                    if (treeData.error) {
+                        $('#or-tree-container').html("<div style='color:red; padding:10px;'>" + treeData.error + "</div>");
+                        return;
+                    }
+
+                    $('#or-tree-container').html("");
+
+                    // Render with D3.js
+                    if (typeof d3 === 'undefined') {
+                        $('#or-tree-container').html("<div style='color:red; padding:10px;'>D3.js failed to load. Please check your internet connection.</div>");
+                        return;
+                    }
+
+                    // Setup SVG
+                    const container = document.getElementById("or-tree-container");
+                    const width = Math.max(800, container.clientWidth);
+                    const height = Math.max(500, container.clientHeight);
+                    
+                    // Simple logic to estimate needed width/height based on tree size
+                    let nodeCount = 0;
+                    let maxDepthFound = 0;
+                    function countNodes(n, d) {
+                        nodeCount++;
+                        if (d > maxDepthFound) maxDepthFound = d;
+                        if (n.children) n.children.forEach(c => countNodes(c, d+1));
+                    }
+                    countNodes(treeData, 0);
+
+                    const svgWidth = Math.max(width, maxDepthFound * 250);
+                    const svgHeight = Math.max(height, nodeCount * 30);
+
+                    const margin = {top: 20, right: 120, bottom: 20, left: 120};
+
+                    const svg = d3.select("#or-tree-container").append("svg")
+                        .attr("width", svgWidth)
+                        .attr("height", svgHeight)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                    const root = d3.hierarchy(treeData);
+                    
+                    const treeLayout = d3.tree().size([svgHeight - margin.top - margin.bottom, svgWidth - margin.left - margin.right]);
+                    treeLayout(root);
+
+                    // Draw links
+                    svg.selectAll(".link")
+                        .data(root.links())
+                        .enter().append("path")
+                        .attr("class", "link")
+                        .attr("fill", "none")
+                        .attr("stroke", "#ccc")
+                        .attr("stroke-width", "1.5px")
+                        .attr("d", d3.linkHorizontal()
+                            .x(d => d.y)
+                            .y(d => d.x)
+                        );
+
+                    // Draw nodes
+                    const nodeElements = svg.selectAll(".node")
+                        .data(root.descendants())
+                        .enter().append("g")
+                        .attr("class", "node")
+                        .attr("transform", d => "translate(" + d.y + "," + d.x + ")");
+
+                    // Node circles
+                    nodeElements.append("circle")
+                        .attr("r", 6)
+                        .attr("fill", d => d.children ? "#fff" : "#99ccff")
+                        .attr("stroke", "steelblue")
+                        .attr("stroke-width", "2px");
+
+                    // Node text (Split condition / Leaf class)
+                    nodeElements.append("text")
+                        .attr("dy", "-10px")
+                        .attr("text-anchor", "middle")
+                        .style("font-size", "11px")
+                        .style("font-weight", "bold")
+                        .style("fill", "#333")
+                        .text(d => d.data.condition || d.data.class_name);
+
+                    // Additional info (Samples)
+                    nodeElements.append("text")
+                        .attr("dy", "15px")
+                        .attr("text-anchor", "middle")
+                        .style("font-size", "9px")
+                        .style("fill", "#666")
+                        .text(d => "n=" + d.data.samples);
+
+                }).fail(function(jqxhr) {
+                    var msg = "Failed to fetch tree structure";
+                    try { msg = JSON.parse(jqxhr.responseText).error || msg; } catch(e) {}
+                    $('#or-tree-container').html("<div style='color:red; padding:10px;'>" + msg + "</div>");
+                });
+            });
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-tree-viewer">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-sourceNode"><i class="fa fa-sitemap"></i> Source Model</label>
+        <select id="node-input-sourceNode">
+            <option value="">-- Select Tree Node --</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-maxDepth"><i class="fa fa-level-down"></i> Max Depth</label>
+        <input type="number" id="node-input-maxDepth" placeholder="100" min="1">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-tree-viewer">
+    <p>Visualizes the internal decision rules of a trained Decision Tree.</p>
+</script>

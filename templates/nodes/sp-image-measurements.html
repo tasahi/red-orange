@@ -1,0 +1,44 @@
+<script type="text/html" data-template-name="sp-image-measurements">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-filter_type"><i class="fa fa-calculator"></i> Operation</label>
+        <select id="node-input-filter_type">
+            <option value="mean">Mean</option>
+            <option value="sum">Sum</option>
+            <option value="variance">Variance</option>
+            <option value="standard_deviation">Standard Deviation</option>
+            <option value="extrema">Extrema</option>
+            <option value="center_of_mass">Center of Mass</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('sp-image-measurements', {
+        category: 'SP NDImage',
+        paletteLabel: "Im.Measure.",
+        color: '#fdb462',
+        defaults: {
+            name: { value: "" },
+            filter_type: { value: "mean" }
+        },
+        inputs: 1,
+        outputs: 1,
+        inputLabels: ["Image"],
+        outputLabels: ["Measurements"],
+        icon: "font-awesome/fa-calculator",
+        label: function () {
+            if (this.name) { return this.name; }
+            if (this.filter_type) {
+                return this.filter_type.replace(/_/g, ' ').replace(/\w/g, l => l.toUpperCase());
+            }
+            return "Measurements";
+        },
+        oneditprepare: function () {
+
+        }
+    });
+</script>

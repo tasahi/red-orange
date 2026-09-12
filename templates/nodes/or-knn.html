@@ -1,0 +1,60 @@
+<script type="text/javascript">
+    if (!window.orangeredTrackerLoaded) {
+        window.orangeredTrackerLoaded = true;
+        $.getScript("orangered/tracker-ui.js");
+    }
+    RED.nodes.registerType('or-knn', {
+        category: 'OR Model',
+        color: '#FAC1D9',
+        defaults: {
+            name: { value: "" },
+            nNeighbors: { value: 5 },
+            metric: { value: "euclidean" },
+            weightType: { value: "uniform" }
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: ["Learner", "Model"],
+        icon: "font-awesome/fa-users",
+        paletteLabel: "kNN",
+        label: function() {
+            return this.name || "kNN";
+        },
+        oneditprepare: function() {
+            if (window.orangeredTracker) {
+                window.orangeredTracker.addHistoryPanel(this);
+            }
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-knn">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-nNeighbors"><i class="fa fa-users"></i> Neighbors (k)</label>
+        <input type="number" id="node-input-nNeighbors" placeholder="5" min="1">
+    </div>
+    <div class="form-row">
+        <label for="node-input-metric"><i class="fa fa-arrows-h"></i> Distance Metric</label>
+        <select id="node-input-metric">
+            <option value="euclidean">Euclidean</option>
+            <option value="manhattan">Manhattan</option>
+            <option value="chebyshev">Chebyshev</option>
+            <option value="minkowski">Minkowski</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-weightType"><i class="fa fa-balance-scale"></i> Weight</label>
+        <select id="node-input-weightType">
+            <option value="uniform">Uniform</option>
+            <option value="distance">Distance</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-knn">
+    <p>k-Nearest Neighbors classification learner. Classifies instances by majority vote of their closest neighbours.</p>
+</script>

@@ -1,0 +1,101 @@
+<script type="text/html" data-template-name="sp-image-filters-2d">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-filter_type"><i class="fa fa-filter"></i> Filter</label>
+        <select id="node-input-filter_type">
+            <option value="gaussian">Gaussian Blur</option>
+            <option value="median">Median Filter</option>
+            <option value="sobel">Sobel Edge Detection</option>
+            <option value="maximum">Maximum Filter</option>
+            <option value="minimum">Minimum Filter</option>
+            <option value="uniform">Uniform Filter</option>
+            <option value="percentile">Percentile Filter</option>
+            <option value="zoom">Scaling (Zoom)</option>
+            <option value="extract_r">Extract Channel R (Red)</option>
+            <option value="extract_g">Extract Channel G (Green)</option>
+            <option value="extract_b">Extract Channel B (Blue)</option>
+        </select>
+    </div>
+    <div class="form-row" id="row-sigma">
+        <label for="node-input-sigma"><i class="fa fa-sliders"></i> Sigma</label>
+        <input type="number" id="node-input-sigma" step="0.1" value="2.0">
+    </div>
+    <div class="form-row" id="row-size">
+        <label for="node-input-size"><i class="fa fa-sliders"></i> Size</label>
+        <input type="number" id="node-input-size" step="1" value="3">
+    </div>
+    <div class="form-row" id="row-zoom">
+        <label for="node-input-zoom_factor"><i class="fa fa-search-plus"></i> Zoom Factor</label>
+        <input type="number" id="node-input-zoom_factor" step="0.1" value="0.5">
+    </div>
+    <div class="form-row" id="row-percentile">
+        <label for="node-input-percentile"><i class="fa fa-percent"></i> Percentile</label>
+        <input type="number" id="node-input-percentile" step="1" value="50">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('sp-image-filters-2d', {
+        category: 'SP NDImage',
+        paletteLabel: "Img Filters 2D",
+        color: '#b2df8a',
+        defaults: {
+            name: { value: "" },
+            filter_type: { value: "gaussian" },
+            sigma: { value: 2.0 },
+            size: { value: 3 },
+            zoom_factor: { value: 0.5 },
+            percentile: { value: 50 }
+        },
+        inputs: 1,
+        outputs: 1,
+        inputLabels: ["Image"],
+        outputLabels: ["Image"],
+        icon: "font-awesome/fa-filter",
+        label: function () {
+            if (this.name) {
+                return this.name;
+            }
+            if (this.filter_type) {
+                var filterNames = {
+                    "gaussian": "Gaussian Blur",
+                    "median": "Median Filter",
+                    "sobel": "Sobel Edge",
+                    "maximum": "Maximum Filter",
+                    "minimum": "Minimum Filter",
+                    "uniform": "Uniform Filter",
+                    "percentile": "Percentile Filter",
+                    "zoom": "Scale (Zoom)",
+                    "extract_r": "Extract Red",
+                    "extract_g": "Extract Green",
+                    "extract_b": "Extract Blue"
+                };
+                return filterNames[this.filter_type] || "SciPy Filter";
+            }
+            return "SciPy Filter";
+        },
+        oneditprepare: function () {
+            $("#node-input-filter_type").on("change", function () {
+                var val = $(this).val();
+                $("#row-sigma").hide();
+                $("#row-size").hide();
+                $("#row-zoom").hide();
+                $("#row-percentile").hide();
+
+                if (val === "gaussian") {
+                    $("#row-sigma").show();
+                } else if (["median", "maximum", "minimum", "uniform"].includes(val)) {
+                    $("#row-size").show();
+                } else if (val === "percentile") {
+                    $("#row-size").show();
+                    $("#row-percentile").show();
+                } else if (val === "zoom") {
+                    $("#row-zoom").show();
+                }
+            }).change();
+        }
+    });
+</script>

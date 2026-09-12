@@ -1,0 +1,67 @@
+<script type="text/javascript">
+    if (!window.orangeredTrackerLoaded) {
+        window.orangeredTrackerLoaded = true;
+        $.getScript("orangered/tracker-ui.js");
+    }
+    RED.nodes.registerType('or-neural-network', {
+        category: 'OR Model',
+        color: '#FAC1D9',
+        defaults: {
+            name: { value: "" },
+            hidden_layer_sizes: { value: "100" },
+            activation: { value: "relu" },
+            solver: { value: "adam" },
+            alpha: { value: 0.0001 },
+            max_iter: { value: 200 }
+        },
+        inputs: 2,
+        outputs: 2,
+        outputLabels: ["Learner", "Model"],
+        icon: "font-awesome/fa-sitemap",
+        paletteLabel: "Neural Network",
+        label: function() { return this.name || "Neural Network"; },
+        oneditprepare: function() {
+            if (window.orangeredTrackerUI) {
+                window.orangeredTrackerUI.injectHistoryTab(this);
+            }
+        }
+    });
+</script>
+<script type="text/html" data-template-name="or-neural-network">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-hidden_layer_sizes"><i class="fa fa-braille"></i> Hidden Layers</label>
+        <input type="text" id="node-input-hidden_layer_sizes" placeholder="e.g. 100,50">
+    </div>
+    <div class="form-row">
+        <label for="node-input-activation"><i class="fa fa-bolt"></i> Activation</label>
+        <select id="node-input-activation">
+            <option value="relu">ReLU</option>
+            <option value="logistic">Logistic</option>
+            <option value="tanh">Tanh</option>
+            <option value="identity">Identity</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-solver"><i class="fa fa-cogs"></i> Solver</label>
+        <select id="node-input-solver">
+            <option value="adam">Adam</option>
+            <option value="sgd">SGD</option>
+            <option value="lbfgs">L-BFGS</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-alpha"><i class="fa fa-percent"></i> Alpha (L2)</label>
+        <input type="number" id="node-input-alpha" step="0.0001">
+    </div>
+    <div class="form-row">
+        <label for="node-input-max_iter"><i class="fa fa-refresh"></i> Max Iter</label>
+        <input type="number" id="node-input-max_iter" min="10">
+    </div>
+</script>
+<script type="text/html" data-help-name="or-neural-network">
+    <p>Multi-layer Perceptron (Neural Network) Learner.</p>
+</script>

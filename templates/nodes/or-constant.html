@@ -1,0 +1,33 @@
+<script type="text/javascript">
+    if (!window.orangeredTrackerLoaded) {
+        window.orangeredTrackerLoaded = true;
+        $.getScript("orangered/tracker-ui.js");
+    }
+    RED.nodes.registerType('or-constant', {
+        category: 'OR Model',
+        color: '#FAC1D9',
+        defaults: {
+            name: { value: "" }
+        },
+        inputs: 2,
+        outputs: 2,
+        outputLabels: ["Learner", "Model"],
+        icon: "font-awesome/fa-minus",
+        paletteLabel: "Constant",
+        label: function() { return this.name || "Constant"; },
+        oneditprepare: function() {
+            if (window.orangeredTrackerUI) {
+                window.orangeredTrackerUI.injectHistoryTab(this);
+            }
+        }
+    });
+</script>
+<script type="text/html" data-template-name="or-constant">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+<script type="text/html" data-help-name="or-constant">
+    <p>Constant (Dummy) Learner. Predicts majority class or mean value. Useful as a baseline.</p>
+</script>

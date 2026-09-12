@@ -1,0 +1,62 @@
+<script type="text/javascript">
+    RED.nodes.registerType('or-outliers', {
+        category: 'OR Unsupervised',
+        color: '#CAE1EF',
+        defaults: {
+            name: { value: "" },
+            method: { value: "lof" },
+            contamination: { value: 0.1 }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "cog.png",
+        paletteLabel: "Outliers",
+        label: function() {
+            return this.name || "Outliers";
+        },
+        oneditprepare: function() {
+            const node = this;
+            $('<hr>').appendTo('#dialog-form');
+            const previewBtn = $('<button type="button" class="ui-button ui-corner-all ui-widget">Preview Output (Data)</button>')
+                .appendTo('#dialog-form')
+                .on("click", function() {
+                    $('#or-preview-container').html("Loading preview...");
+                    $.getJSON("orangered/preview/" + node.id + "/Data", function(data) {
+                        if (data.error) {
+                            $('#or-preview-container').html("<div style='color:red'>" + data.error + "</div>");
+                            return;
+                        }
+                        $('#or-preview-container').html("<pre>" + JSON.stringify(data.rows.slice(0, 10), null, 2) + "</pre>");
+                        $('#or-preview-stats').html("<b>" + data.total_rows + "</b> rows × <b>" + data.total_cols + "</b> variables");
+                    }).fail(function(jqxhr) {
+                        $('#or-preview-container').html("<div style='color:red'>No data yet. Execute the workflow first.</div>");
+                    });
+                });
+            $('<div id="or-preview-container" style="margin-top:10px; width:100%; min-height:50px;"></div>').appendTo('#dialog-form');
+            $('<div id="or-preview-stats" style="margin-top:5px; font-size:0.9em; color:#666;"></div>').appendTo('#dialog-form');
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-outliers">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-method"><i class="fa fa-exclamation-triangle"></i> Method</label>
+        <select id="node-input-method">
+            <option value="lof">Local Outlier Factor</option>
+            <option value="isolation_forest">Isolation Forest</option>
+            <option value="covariance">Elliptic Envelope</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-contamination"><i class="fa fa-percent"></i> Contamination</label>
+        <input type="number" id="node-input-contamination" min="0.01" max="0.5" step="0.01" value="0.1">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-outliers">
+    <p>Detects unusual data points (outliers) and separates them from normal data. The contamination setting is the expected proportion of outliers.</p>
+</script>

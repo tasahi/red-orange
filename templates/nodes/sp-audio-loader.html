@@ -1,0 +1,33 @@
+<script type="text/html" data-template-name="sp-audio-loader">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-file_path"><i class="fa fa-file-audio-o"></i> File Path</label>
+        <input type="text" id="node-input-file_path" placeholder="C:\path\to\audio.wav">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('sp-audio-loader', {
+        category: 'SP Audio',
+        paletteLabel: "Audio Loader",
+        color: '#bc80ea',
+        defaults: {
+            name: { value: "" },
+            file_path: { value: "", required: true }
+        },
+        inputs: 0,
+        outputs: 1,
+        inputLabels: [],
+        outputLabels: ["Audio"],
+        icon: "font-awesome/fa-music",
+        label: function() {
+            return this.name || "Audio Loader";
+        },
+        oneditprepare: function() {
+ 
+        }
+    });
+</script>

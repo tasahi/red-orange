@@ -1,0 +1,148 @@
+<script type="text/javascript">
+    RED.nodes.registerType('or-correlations', {
+        category: 'OR Transform',
+        color: '#ffaa22',
+        defaults: {
+            name: { value: "" },
+            method: { value: "pearson" },
+            threshold: { value: 0.0 }
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: ["Data", "Correlation Table"],
+        icon: "font-awesome/fa-exchange",
+        paletteLabel: "Correlations",
+        label: function() {
+            return this.name || "Correlations";
+        },
+        oneditprepare: function() {
+            const node = this;
+
+            const tabs = RED.tabs.create({
+                id: "or-corr-tabs",
+                onchange: function(tab) {
+                    $("#or-corr-tabs-content").children().hide();
+                    $("#" + tab.id).show();
+                    if (tab.id === "or-corr-tab-matrix") {
+                        renderMatrix();
+                    } else if (tab.id === "or-corr-tab-pairs") {
+                        renderPairs();
+                    }
+                }
+            });
+            tabs.addTab({ id: "or-corr-tab-settings", label: "Settings" });
+            tabs.addTab({ id: "or-corr-tab-pairs", label: "Pairwise Table" });
+            tabs.addTab({ id: "or-corr-tab-matrix", label: "Correlation Matrix" });
+
+            let corrData = null;
+
+            function fetchCorr(cb) {
+                if (corrData) {
+                    return cb(corrData);
+                }
+                $.getJSON("orangered/correlations/" + node.id, function(data) {
+                    corrData = data;
+                    cb(data);
+                }).fail(function() {
+                    $("#or-corr-pairs-container").html("<div style='color:red; padding:10px;'>Run the workflow first to compute correlations.</div>");
+                    $("#or-corr-matrix-container").html("<div style='color:red; padding:10px;'>Run the workflow first to compute correlations.</div>");
+                });
+            }
+
+            function renderPairs() {
+                fetchCorr(function(data) {
+                    if (!data.pairs || data.pairs.length === 0) {
+                        $("#or-corr-pairs-container").html("<div style='padding:10px;'>No continuous features found.</div>");
+                        return;
+                    }
+                    $("#or-corr-pairs-container").html("");
+                    new Tabulator("#or-corr-pairs-container", {
+                        data: data.pairs,
+                        layout: "fitColumns",
+                        height: "300px",
+                        columns: [
+                            { title: "Feature A", field: "feature_a" },
+                            { title: "Feature B", field: "feature_b" },
+                            { title: "Correlation", field: "correlation", formatter: "money", formatterParams: {symbol: "", precision: 4} },
+                            { title: "p-value", field: "p_value", formatter: "money", formatterParams: {symbol: "", precision: 5} }
+                        ]
+                    });
+                });
+            }
+
+            function renderMatrix() {
+                fetchCorr(function(data) {
+                    if (!data.matrix || data.matrix.length === 0) {
+                        $("#or-corr-matrix-container").html("<div style='padding:10px;'>No correlation matrix available.</div>");
+                        return;
+                    }
+                    $("#or-corr-matrix-container").html("<div id='or-corr-plot' style='width:100%; height:320px;'></div>");
+                    
+                    const trace = {
+                        z: data.matrix,
+                        x: data.features,
+                        y: data.features,
+                        type: 'heatmap',
+                        colorscale: 'RdBu',
+                        reversescale: true,
+                        zmin: -1,
+                        zmax: 1
+                    };
+                    const layout = {
+                        margin: { l: 80, r: 20, t: 20, b: 80 },
+                        xaxis: { tickangle: -45 }
+                    };
+                    Plotly.newPlot('or-corr-plot', [trace], layout, { responsive: true, displayModeBar: false });
+                });
+            }
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-correlations">
+    <div class="form-row">
+        <ul id="or-corr-tabs"></ul>
+    </div>
+    <div id="or-corr-tabs-content" style="min-height: 350px;">
+        <div id="or-corr-tab-settings">
+            <div class="form-row">
+                <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+                <input type="text" id="node-input-name" placeholder="Name">
+            </div>
+            <div class="form-row">
+                <label for="node-input-method"><i class="fa fa-calculator"></i> Method</label>
+                <select id="node-input-method" style="width:70%;">
+                    <option value="pearson">Pearson Correlation</option>
+                    <option value="spearman">Spearman Rank Correlation</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="node-input-threshold"><i class="fa fa-filter"></i> Filter</label>
+                <input type="number" id="node-input-threshold" step="0.05" min="0" max="1" style="width:70%;" placeholder="Min absolute correlation">
+            </div>
+        </div>
+        <div id="or-corr-tab-pairs" style="display:none;">
+            <div id="or-corr-pairs-container" style="width:100%; min-height:280px;"></div>
+        </div>
+        <div id="or-corr-tab-matrix" style="display:none;">
+            <div id="or-corr-matrix-container" style="width:100%; min-height:320px;"></div>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-correlations">
+    <p>Computes pairwise Pearson or Spearman correlation coefficients and p-values between continuous features.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>Data <span class="property-type">Orange.data.Table</span></dt>
+        <dd>Input dataset containing continuous features.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>Data <span class="property-type">Orange.data.Table</span></dt>
+        <dd>Pass-through original dataset.</dd>
+        <dt>Correlation Table <span class="property-type">Orange.data.Table</span></dt>
+        <dd>Table containing feature pairs sorted by correlation magnitude.</dd>
+    </dl>
+</script>
+

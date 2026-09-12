@@ -1,0 +1,62 @@
+<script type="text/javascript">
+    if (!window.orangeredTrackerLoaded) {
+        window.orangeredTrackerLoaded = true;
+        $.getScript("orangered/tracker-ui.js");
+    }
+    RED.nodes.registerType('or-sgd', {
+        category: 'OR Model',
+        color: '#FAC1D9',
+        defaults: {
+            name: { value: "" },
+            loss: { value: "hinge" },
+            penalty: { value: "l2" },
+            alpha: { value: 0.0001 },
+            max_iter: { value: 1000 }
+        },
+        inputs: 2,
+        outputs: 2,
+        outputLabels: ["Learner", "Model"],
+        icon: "font-awesome/fa-line-chart",
+        paletteLabel: "SGD",
+        label: function() { return this.name || "SGD"; },
+        oneditprepare: function() {
+            if (window.orangeredTrackerUI) {
+                window.orangeredTrackerUI.injectHistoryTab(this);
+            }
+        }
+    });
+</script>
+<script type="text/html" data-template-name="or-sgd">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-loss"><i class="fa fa-exclamation-circle"></i> Loss</label>
+        <select id="node-input-loss">
+            <option value="hinge">Hinge (SVM)</option>
+            <option value="log_loss">Log Loss (LR)</option>
+            <option value="modified_huber">Modified Huber</option>
+            <option value="squared_error">Squared Error</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-penalty"><i class="fa fa-gavel"></i> Penalty</label>
+        <select id="node-input-penalty">
+            <option value="l2">L2</option>
+            <option value="l1">L1</option>
+            <option value="elasticnet">ElasticNet</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-alpha"><i class="fa fa-percent"></i> Alpha</label>
+        <input type="number" id="node-input-alpha" step="0.0001">
+    </div>
+    <div class="form-row">
+        <label for="node-input-max_iter"><i class="fa fa-refresh"></i> Max Iter</label>
+        <input type="number" id="node-input-max_iter" min="10">
+    </div>
+</script>
+<script type="text/html" data-help-name="or-sgd">
+    <p>Stochastic Gradient Descent Learner.</p>
+</script>

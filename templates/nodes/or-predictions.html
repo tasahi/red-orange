@@ -1,0 +1,92 @@
+<script type="text/javascript">
+    if (!window.tabulatorLoaded) {
+        window.tabulatorLoaded = true;
+        const link = document.createElement("link");
+        link.href = "https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css";
+        link.rel = "stylesheet";
+        document.head.appendChild(link);
+        const script = document.createElement("script");
+        script.src = "https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js";
+        document.head.appendChild(script);
+    }
+
+    RED.nodes.registerType('or-predictions', {
+        category: 'OR Evaluate',
+        color: '#C3F3F3',
+        defaults: {
+            name: { value: "" }
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: ["Predictions", "Evaluation Results"],
+        icon: "font-awesome/fa-magic",
+        paletteLabel: "Predictions",
+        label: function() {
+            return this.name || "Predictions";
+        },
+        oneditprepare: function() {
+            const node = this;
+            $('<hr>').appendTo('#dialog-form');
+            
+            const previewDataBtn = $('<button type="button" class="ui-button ui-corner-all ui-widget">View Predictions</button>')
+                .appendTo('#dialog-form')
+                .on("click", function() {
+                    $('#or-preview-container').html(`Loading Predictions...`);
+                    $.getJSON("orangered/preview/" + node.id + "/Predictions", function(data) {
+                        if (data.error) {
+                            $('#or-preview-container').html("<div style='color:red'>" + data.error + "</div>");
+                            return;
+                        }
+                        
+                        $('#or-preview-container').html("");
+                        const columns = [];
+                        function addCols(specs, roleColor) {
+                            specs.forEach(s => {
+                                let icon = "C";
+                                if (s.var_type === "discrete") icon = "D";
+                                if (s.var_type === "string") icon = "S";
+                                columns.push({
+                                    title: `[${icon}] ${s.name}`,
+                                    field: s.name,
+                                    headerSort: true,
+                                    formatter: function(cell) {
+                                        cell.getElement().style.backgroundColor = roleColor;
+                                        return cell.getValue();
+                                    }
+                                });
+                            });
+                        }
+                        addCols(data.schema.attributes, "#ffffff");
+                        addCols(data.schema.class_vars, "#e6f2ff");
+                        addCols(data.schema.metas, "#ffffcc"); // Highlight prediction columns (metas)
+                        
+                        new Tabulator("#or-preview-container", {
+                            data: data.rows,
+                            layout: "fitDataStretch",
+                            columns: columns,
+                            height: "400px",
+                            pagination: "local",
+                            paginationSize: 20
+                        });
+                        $('#or-preview-stats').html(`<b>${data.total_rows}</b> rows × <b>${data.total_cols}</b> variables`);
+                    }).fail(function(jqxhr) {
+                        $('#or-preview-container').html("<div style='color:red'>Failed to fetch predictions.</div>");
+                    });
+                });
+
+            $('<div id="or-preview-container" style="margin-top:10px; width:100%; min-height:100px;"></div>').appendTo('#dialog-form');
+            $('<div id="or-preview-stats" style="margin-top:5px; font-size:0.9em; color:#666;"></div>').appendTo('#dialog-form');
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-predictions">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-predictions">
+    <p>Displays data with appended prediction columns from connected learners.</p>
+</script>

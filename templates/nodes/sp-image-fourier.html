@@ -1,0 +1,63 @@
+<script type="text/html" data-template-name="sp-image-fourier">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-filter_type"><i class="fa fa-filter"></i> Filter</label>
+        <select id="node-input-filter_type">
+            <option value="fourier_gaussian">Fourier Gaussian</option>
+            <option value="fourier_uniform">Fourier Uniform</option>
+            <option value="fourier_ellipsoid">Fourier Ellipsoid</option>
+            <option value="fourier_shift">Fourier Shift</option>
+        </select>
+    </div>
+    <div class="form-row" id="row-sigma">
+        <label for="node-input-sigma"><i class="fa fa-sliders"></i> Sigma</label>
+        <input type="number" id="node-input-sigma" step="0.1" value="2.0">
+    </div>
+    <div class="form-row" id="row-size">
+        <label for="node-input-size"><i class="fa fa-sliders"></i> Size</label>
+        <input type="number" id="node-input-size" step="0.1" value="3.0">
+    </div>
+    <div class="form-row" id="row-shift">
+        <label for="node-input-shift"><i class="fa fa-arrows"></i> Shift</label>
+        <input type="number" id="node-input-shift" step="0.1" value="1.0">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('sp-image-fourier', {
+        category: 'SP NDImage',
+        paletteLabel: "Img Fourier",
+        color: '#cab2d6',
+        defaults: {
+            name: { value: "" },
+            filter_type: { value: "fourier_gaussian" },
+            sigma: { value: 2.0 },
+            size: { value: 3.0 },
+            shift: { value: 1.0 }
+        },
+        inputs: 1,
+        outputs: 1,
+        inputLabels: ["Image"],
+        outputLabels: ["Image"],
+        icon: "font-awesome/fa-wave-square",
+        label: function () {
+            if (this.name) { return this.name; }
+            if (this.filter_type) {
+                return this.filter_type.replace(/_/g, ' ').replace(/\w/g, l => l.toUpperCase());
+            }
+            return "Fourier";
+        },
+        oneditprepare: function () {
+            $("#node-input-filter_type").on("change", function () {
+                var val = $(this).val();
+                $("#row-sigma, #row-size, #row-shift").hide();
+                if (val === "fourier_gaussian") $("#row-sigma").show();
+                else if (val === "fourier_shift") $("#row-shift").show();
+                else $("#row-size").show();
+            }).change();
+        }
+    });
+</script>

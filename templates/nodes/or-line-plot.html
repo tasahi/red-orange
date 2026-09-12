@@ -1,0 +1,193 @@
+<script type="text/javascript">
+    RED.nodes.registerType('or-line-plot', {
+        category: 'OR Visualize',
+        color: '#FFB7B1',
+        defaults: {
+            name: { value: "" },
+            xVariable: { value: "" },
+            yVariable: { value: "" },
+            colorGroup: { value: "" },
+            maxRows: { value: 10000 }
+        },
+        inputs: 1,
+        outputs: 0,
+        icon: "font-awesome/fa-eye",
+        paletteLabel: "Line Plot",
+        label: function() {
+            return this.name || "Line Plot";
+        },
+        oneditprepare: function() {
+            if (!window.plotlyLoaded) {
+                window.plotlyLoaded = true;
+                const script = document.createElement("script");
+                script.src = "https://cdn.plot.ly/plotly-2.30.0.min.js";
+                document.head.appendChild(script);
+            }
+
+            const node = this;
+            
+            $('<hr>').appendTo('#dialog-form');
+            const previewBtn = $('<button type="button" class="ui-button ui-corner-all ui-widget">Render Line Plot</button>')
+                .appendTo('#dialog-form');
+            $('<div id="or-lineplot-container" style="width:100%; height:450px; margin-top:10px;"></div>').appendTo('#dialog-form');
+
+            function updateDropdowns(schema) {
+                const xSelect = $('#node-input-xVariable');
+                const ySelect = $('#node-input-yVariable');
+                const colorSelect = $('#node-input-colorGroup');
+                
+                const currentX = xSelect.val() || node.xVariable;
+                const currentY = ySelect.val() || node.yVariable;
+                const currentC = colorSelect.val() || node.colorGroup;
+
+                xSelect.empty().append('<option value="">-- Index (Row Number) --</option>');
+                ySelect.empty().append('<option value="">-- Select Y Variable --</option>');
+                colorSelect.empty().append('<option value="">-- No Grouping --</option>');
+
+                if (!schema) return;
+
+                const allVars = [].concat(schema.attributes, schema.class_vars, schema.metas);
+                
+                allVars.forEach(v => {
+                    if (!v) return;
+                    xSelect.append($('<option>', { value: v.name, text: v.name }));
+                    if (v.var_type === "continuous") {
+                        ySelect.append($('<option>', { value: v.name, text: v.name }));
+                    }
+                    if (v.var_type === "discrete" || v.var_type === "string") {
+                        colorSelect.append($('<option>', { value: v.name, text: v.name }));
+                    }
+                });
+
+                if (currentX) xSelect.val(currentX);
+                if (currentY) ySelect.val(currentY);
+                if (currentC) colorSelect.val(currentC);
+            }
+
+            $.getJSON("orangered/preview/" + node.id + "/Data?rows=0", function(data) {
+                if (!data.error && data.schema) {
+                    updateDropdowns(data.schema);
+                }
+            }).always(function() {
+                if (node.yVariable) {
+                    setTimeout(function() { previewBtn.click(); }, 100);
+                }
+            });
+
+            previewBtn.on("click", function() {
+                const xVar = $('#node-input-xVariable').val();
+                const yVar = $('#node-input-yVariable').val();
+                const colorGrp = $('#node-input-colorGroup').val();
+                const maxRows = $('#node-input-maxRows').val() || 10000;
+
+                if (!yVar) {
+                    $('#or-lineplot-container').html("<div style='color:red'>Please select a Y Variable.</div>");
+                    return;
+                }
+
+                $('#or-lineplot-container').html("Loading data...");
+
+                $.getJSON("orangered/preview/" + node.id + "/Data?rows=" + maxRows, function(data) {
+                    if (data.error) {
+                        $('#or-lineplot-container').html("<div style='color:red'>" + data.error + "</div>");
+                        return;
+                    }
+
+                    if (!data.schema) {
+                        updateDropdowns(null);
+                        return;
+                    }
+
+                    updateDropdowns(data.schema);
+                    $('#or-lineplot-container').html("");
+
+                    let traces = [];
+
+                    if (!colorGrp) {
+                        let xData = xVar ? data.rows.map(r => r[xVar]) : data.rows.map((_, i) => i);
+                        let yData = data.rows.map(r => r[yVar]);
+                        
+                        traces.push({
+                            x: xData,
+                            y: yData,
+                            type: 'scatter',
+                            mode: 'lines',
+                            name: yVar
+                        });
+                    } else {
+                        let groups = {};
+                        data.rows.forEach((r, i) => {
+                            let g = r[colorGrp];
+                            let xv = xVar ? r[xVar] : i;
+                            let yv = r[yVar];
+                            
+                            if (g === null || g === undefined) g = "Missing";
+                            if (yv !== null && yv !== undefined) {
+                                if (!groups[g]) groups[g] = {x: [], y: []};
+                                groups[g].x.push(xv);
+                                groups[g].y.push(yv);
+                            }
+                        });
+
+                        for (let g in groups) {
+                            traces.push({
+                                x: groups[g].x,
+                                y: groups[g].y,
+                                type: 'scatter',
+                                mode: 'lines',
+                                name: String(g)
+                            });
+                        }
+                    }
+
+                    let layout = {
+                        title: 'Line Plot: ' + yVar,
+                        xaxis: { title: xVar || 'Row Index' },
+                        yaxis: { title: yVar },
+                        margin: { t: 40, l: 50, r: 20, b: 50 }
+                    };
+
+                    Plotly.newPlot('or-lineplot-container', traces, layout);
+
+                }).fail(function(jqxhr) {
+                    var msg = "Failed to fetch data";
+                    try { msg = JSON.parse(jqxhr.responseText).error || msg; } catch(e) {}
+                    $('#or-lineplot-container').html("<div style='color:red'>" + msg + "</div>");
+                });
+            });
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-line-plot">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-xVariable"><i class="fa fa-arrows-h"></i> X Axis</label>
+        <select id="node-input-xVariable">
+            <option value="">-- Index (Row Number) --</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-yVariable"><i class="fa fa-arrows-v"></i> Y Axis</label>
+        <select id="node-input-yVariable">
+            <option value="">-- Deploy node first --</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-colorGroup"><i class="fa fa-paint-brush"></i> Group By (Color)</label>
+        <select id="node-input-colorGroup">
+            <option value="">-- No Grouping --</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-maxRows"><i class="fa fa-filter"></i> Max Rows to fetch</label>
+        <input type="number" id="node-input-maxRows" placeholder="10000" min="1">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-line-plot">
+    <p>Visualizes sequence or time-series data using Line Plots.</p>
+</script>

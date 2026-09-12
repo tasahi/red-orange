@@ -1,0 +1,62 @@
+<script type="text/html" data-template-name="sp-image-filters-1d">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-filter_type"><i class="fa fa-filter"></i> Filter</label>
+        <select id="node-input-filter_type">
+            <option value="gaussian_filter1d">Gaussian Filter 1D</option>
+            <option value="maximum_filter1d">Maximum Filter 1D</option>
+            <option value="minimum_filter1d">Minimum Filter 1D</option>
+            <option value="uniform_filter1d">Uniform Filter 1D</option>
+        </select>
+    </div>
+    <div class="form-row" id="row-axis">
+        <label for="node-input-axis"><i class="fa fa-arrows"></i> Axis</label>
+        <input type="number" id="node-input-axis" step="1" value="-1">
+    </div>
+    <div class="form-row" id="row-sigma">
+        <label for="node-input-sigma"><i class="fa fa-sliders"></i> Sigma</label>
+        <input type="number" id="node-input-sigma" step="0.1" value="2.0">
+    </div>
+    <div class="form-row" id="row-size">
+        <label for="node-input-size"><i class="fa fa-sliders"></i> Size</label>
+        <input type="number" id="node-input-size" step="1" value="3">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('sp-image-filters-1d', {
+        category: 'SP NDImage',
+        paletteLabel: "Img Filters 1D",
+        color: '#b2df8a',
+        defaults: {
+            name: { value: "" },
+            filter_type: { value: "gaussian_filter1d" },
+            axis: { value: -1 },
+            sigma: { value: 2.0 },
+            size: { value: 3 }
+        },
+        inputs: 1,
+        outputs: 1,
+        inputLabels: ["Image"],
+        outputLabels: ["Image"],
+        icon: "font-awesome/fa-filter",
+        label: function () {
+            if (this.name) { return this.name; }
+            if (this.filter_type) {
+                return this.filter_type.replace(/_/g, ' ').replace(/\w/g, l => l.toUpperCase());
+            }
+            return "1d";
+        },
+        oneditprepare: function () {
+            $("#node-input-filter_type").on("change", function () {
+                var val = $(this).val();
+                $("#row-sigma, #row-size").hide();
+                if (val === "gaussian_filter1d") $("#row-sigma").show();
+                else $("#row-size").show();
+            }).change();
+        }
+    });
+</script>

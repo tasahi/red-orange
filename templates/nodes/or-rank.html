@@ -1,0 +1,158 @@
+<script type="text/javascript">
+    RED.nodes.registerType('or-rank', {
+        category: 'OR Transform',
+        color: '#ffaa22',
+        defaults: {
+            name: { value: "" },
+            scoring_method: { value: "auto" },
+            select_mode: { value: "top_k" },
+            n_selected: { value: 5 },
+            threshold: { value: 0.0 }
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: ["Reduced Data", "Scores"],
+        icon: "font-awesome/fa-sort-amount-desc",
+        paletteLabel: "Rank",
+        label: function() {
+            return this.name || "Rank";
+        },
+        oneditprepare: function() {
+            const node = this;
+
+            const tabs = RED.tabs.create({
+                id: "or-rank-tabs",
+                onchange: function(tab) {
+                    $("#or-rank-tabs-content").children().hide();
+                    $("#" + tab.id).show();
+                    if (tab.id === "or-rank-tab-scores") {
+                        renderScores();
+                    }
+                }
+            });
+            tabs.addTab({ id: "or-rank-tab-settings", label: "Settings" });
+            tabs.addTab({ id: "or-rank-tab-scores", label: "Feature Scores" });
+
+            function toggleSelectMode() {
+                const mode = $("#node-input-select_mode").val();
+                if (mode === "top_k") {
+                    $("#or-top-k-row").show();
+                    $("#or-thresh-row").hide();
+                } else if (mode === "threshold") {
+                    $("#or-top-k-row").hide();
+                    $("#or-thresh-row").show();
+                } else {
+                    $("#or-top-k-row").hide();
+                    $("#or-thresh-row").hide();
+                }
+            }
+
+            $("#node-input-select_mode").on("change", toggleSelectMode);
+            toggleSelectMode();
+
+            function renderScores() {
+                $("#or-rank-scores-container").html("Loading feature scores...");
+                $.getJSON("orangered/rank_scores/" + node.id, function(data) {
+                    if (!data.ranked_features || data.ranked_features.length === 0) {
+                        $("#or-rank-scores-container").html("<div style='padding:10px;'>Run workflow first to calculate rankings.</div>");
+                        return;
+                    }
+                    $("#or-rank-scores-container").html("<div id='or-rank-plot' style='width:100%; height:260px;'></div><div id='or-rank-table' style='width:100%; margin-top:10px;'></div>");
+
+                    // Horizontal bar chart
+                    const sorted = data.ranked_features.slice().reverse();
+                    const trace = {
+                        x: sorted.map(f => f.score),
+                        y: sorted.map(f => f.name),
+                        type: 'bar',
+                        orientation: 'h',
+                        marker: {
+                            color: sorted.map(f => f.selected ? '#2ca02c' : '#a0a0a0')
+                        }
+                    };
+                    const layout = {
+                        title: `Metric: ${data.primary_metric} (${data.n_selected}/${data.n_total} selected)`,
+                        margin: { l: 120, r: 20, t: 30, b: 30 }
+                    };
+                    Plotly.newPlot('or-rank-plot', [trace], layout, { responsive: true, displayModeBar: false });
+
+                    // Table
+                    new Tabulator("#or-rank-table", {
+                        data: data.ranked_features,
+                        layout: "fitColumns",
+                        height: "160px",
+                        columns: [
+                            { title: "Feature", field: "name" },
+                            { title: "Score", field: "score", formatter: "money", formatterParams: {symbol: "", precision: 4} },
+                            { title: "Selected", field: "selected", formatter: "tickCross" }
+                        ]
+                    });
+                }).fail(function() {
+                    $("#or-rank-scores-container").html("<div style='color:red; padding:10px;'>Run workflow first to calculate rankings.</div>");
+                });
+            }
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-rank">
+    <div class="form-row">
+        <ul id="or-rank-tabs"></ul>
+    </div>
+    <div id="or-rank-tabs-content" style="min-height: 350px;">
+        <div id="or-rank-tab-settings">
+            <div class="form-row">
+                <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+                <input type="text" id="node-input-name" placeholder="Name">
+            </div>
+            <div class="form-row">
+                <label for="node-input-scoring_method"><i class="fa fa-sliders"></i> Metric</label>
+                <select id="node-input-scoring_method" style="width:70%;">
+                    <option value="auto">Auto (Best for task)</option>
+                    <option value="infogain">Information Gain</option>
+                    <option value="gainratio">Gain Ratio</option>
+                    <option value="gini">Gini Impurity</option>
+                    <option value="anova">ANOVA F-test</option>
+                    <option value="chi2">Chi-Square</option>
+                    <option value="univariate_linear">Univariate Linear Regression</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="node-input-select_mode"><i class="fa fa-filter"></i> Selection</label>
+                <select id="node-input-select_mode" style="width:70%;">
+                    <option value="top_k">Top K Features</option>
+                    <option value="threshold">Threshold</option>
+                    <option value="all">Keep All</option>
+                </select>
+            </div>
+            <div class="form-row" id="or-top-k-row">
+                <label for="node-input-n_selected"><i class="fa fa-list-ol"></i> Top K</label>
+                <input type="number" id="node-input-n_selected" min="1" max="1000" style="width:70%;">
+            </div>
+            <div class="form-row" id="or-thresh-row">
+                <label for="node-input-threshold"><i class="fa fa-arrows-h"></i> Min Score</label>
+                <input type="number" id="node-input-threshold" step="0.01" style="width:70%;">
+            </div>
+        </div>
+        <div id="or-rank-tab-scores" style="display:none;">
+            <div id="or-rank-scores-container" style="width:100%; min-height:320px;"></div>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-rank">
+    <p>Scores and ranks features using Information Gain, ANOVA, Gini, Chi², or Univariate Regression. Emits Reduced Data and Scores.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>Data <span class="property-type">Orange.data.Table</span></dt>
+        <dd>Dataset with features and a target variable.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>Reduced Data <span class="property-type">Orange.data.Table</span></dt>
+        <dd>Dataset containing only the selected top-scoring features.</dd>
+        <dt>Scores <span class="property-type">Orange.data.Table</span></dt>
+        <dd>Table of all features and their scores across each metric.</dd>
+    </dl>
+</script>
+

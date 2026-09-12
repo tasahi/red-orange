@@ -1,0 +1,43 @@
+<script type="text/javascript">
+    if (!window.orangeredTrackerLoaded) {
+        window.orangeredTrackerLoaded = true;
+        $.getScript("orangered/tracker-ui.js");
+    }
+    RED.nodes.registerType('or-naive-bayes', {
+        category: 'OR Model',
+        color: '#FAC1D9',
+        defaults: {
+            name: { value: "" }
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: ["Learner", "Model"],
+        icon: "font-awesome/fa-calculator",
+        paletteLabel: "Naive Bayes",
+        label: function() {
+            return this.name || "Naive Bayes";
+        },
+        oneditprepare: function() {
+            if (window.orangeredTracker) {
+                window.orangeredTracker.addHistoryPanel(this);
+            }
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-naive-bayes">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <div style="padding:8px; background:#f5f5f5; border-radius:4px; font-size:0.9em;">
+            <i class="fa fa-info-circle"></i> Naive Bayes has no configurable parameters.
+            It uses Bayes' theorem with strong (naive) independence assumptions.
+        </div>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-naive-bayes">
+    <p>Naive Bayes probabilistic classifier based on Bayes' theorem with independence assumptions.</p>
+</script>

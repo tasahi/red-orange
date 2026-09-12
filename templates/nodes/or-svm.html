@@ -1,0 +1,83 @@
+<script type="text/javascript">
+    if (!window.orangeredTrackerLoaded) {
+        window.orangeredTrackerLoaded = true;
+        $.getScript("orangered/tracker-ui.js");
+    }
+    RED.nodes.registerType('or-svm', {
+        category: 'OR Model',
+        color: '#FAC1D9',
+        defaults: {
+            name: { value: "" },
+            svmC: { value: 1.0 },
+            kernel: { value: "rbf" },
+            gamma: { value: 0.0 },
+            degree: { value: 3 },
+            maxIter: { value: 100 }
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: ["Learner", "Model"],
+        icon: "font-awesome/fa-bolt",
+        paletteLabel: "SVM",
+        label: function() {
+            return this.name || "SVM";
+        },
+        oneditprepare: function() {
+            $("#node-input-kernel").on("change", function() {
+                var val = $(this).val();
+                if (val === "poly") {
+                    $("#svm-degree-row").show();
+                } else {
+                    $("#svm-degree-row").hide();
+                }
+                if (val === "linear") {
+                    $("#svm-gamma-row").hide();
+                } else {
+                    $("#svm-gamma-row").show();
+                }
+            });
+            $("#node-input-kernel").change();
+
+            // Training history panel
+            if (window.orangeredTracker) {
+                window.orangeredTracker.addHistoryPanel(this);
+            }
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="or-svm">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-svmC"><i class="fa fa-sliders"></i> Cost (C)</label>
+        <input type="number" id="node-input-svmC" placeholder="1.0" step="0.1" min="0.001">
+    </div>
+    <div class="form-row">
+        <label for="node-input-kernel"><i class="fa fa-cog"></i> Kernel</label>
+        <select id="node-input-kernel">
+            <option value="linear">Linear</option>
+            <option value="poly">Polynomial</option>
+            <option value="rbf">RBF (Gaussian)</option>
+            <option value="sigmoid">Sigmoid</option>
+        </select>
+    </div>
+    <div class="form-row" id="svm-gamma-row">
+        <label for="node-input-gamma"><i class="fa fa-dot-circle-o"></i> Gamma</label>
+        <input type="number" id="node-input-gamma" placeholder="0 = auto" step="0.01" min="0">
+    </div>
+    <div class="form-row" id="svm-degree-row">
+        <label for="node-input-degree"><i class="fa fa-superscript"></i> Degree</label>
+        <input type="number" id="node-input-degree" placeholder="3" min="1">
+    </div>
+    <div class="form-row">
+        <label for="node-input-maxIter"><i class="fa fa-repeat"></i> Max Iterations</label>
+        <input type="number" id="node-input-maxIter" placeholder="100" min="1">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="or-svm">
+    <p>Support Vector Machine classification learner. Uses kernel methods to find optimal decision boundaries.</p>
+</script>
