@@ -1,4 +1,4 @@
-""" Comprehensive test suite covering regression, correlation, rank, tree, and image nodes in FastAPI-Red.
+""" Comprehensive test suite covering regression, correlation, rank, tree, and image nodes in Red-Fastapi.
 """
 
 import asyncio
@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 
 from fastapi_red.main import app
 from fastapi_red.runtime.engine import engine
-from fastapi_red_orangered.base_node import preview_cache
+from red_orange.base_node import preview_cache
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -39,7 +39,7 @@ async def test_linear_regression_and_coefficients(client):
     outputs = preview_cache["lr"]["outputs"]
     assert "Model" in outputs
 
-    res = client.get("/orangered/coefficients/lr")
+    res = client.get("/redorange/coefficients/lr")
     assert res.status_code == 200
     coef_data = res.json()
     assert "rows" in coef_data
@@ -62,7 +62,7 @@ async def test_correlations_and_rank(client):
     await asyncio.sleep(1.0)
 
     # 1. Test Correlations endpoint
-    res_c = client.get("/orangered/correlations/corr")
+    res_c = client.get("/redorange/correlations/corr")
     assert res_c.status_code == 200
     corr_data = res_c.json()
     assert "features" in corr_data
@@ -70,7 +70,7 @@ async def test_correlations_and_rank(client):
     assert len(corr_data["matrix"]) == 4
 
     # 2. Test Rank endpoint
-    res_r = client.get("/orangered/rank_scores/rk")
+    res_r = client.get("/redorange/rank_scores/rk")
     assert res_r.status_code == 200
     rank_data = res_r.json()
     assert "ranked_features" in rank_data
@@ -91,7 +91,7 @@ async def test_tree_hierarchy_endpoint(client):
     await loader.on_input({})
     await asyncio.sleep(1.0)
 
-    res_t = client.get("/orangered/tree/tr")
+    res_t = client.get("/redorange/tree/tr")
     assert res_t.status_code == 200
     tree_data = res_t.json()
     assert "name" in tree_data

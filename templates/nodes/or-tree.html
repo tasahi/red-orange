@@ -1,8 +1,8 @@
 <script type="text/javascript">
     // Load shared tracker UI (once)
-    if (!window.orangeredTrackerLoaded) {
-        window.orangeredTrackerLoaded = true;
-        $.getScript("orangered/tracker-ui.js");
+    if (!window.redorangeTrackerLoaded) {
+        window.redorangeTrackerLoaded = true;
+        $.getScript("redorange/tracker-ui.js");
     }
 
     RED.nodes.registerType('or-tree', {
@@ -23,8 +23,8 @@
             return this.name || "Tree";
         },
         oneditprepare: function() {
-            if (window.orangeredTracker) {
-                window.orangeredTracker.addHistoryPanel(this);
+            if (window.redorangeTracker) {
+                window.redorangeTracker.addHistoryPanel(this);
             }
         }
     });

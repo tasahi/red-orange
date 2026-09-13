@@ -1,7 +1,7 @@
-""" FastAPI APIRouter for OrangeRed preview, metrics, and diagnostics.
+""" FastAPI APIRouter for RedOrange preview, metrics, and diagnostics.
 
-Mounts routes under both /orangered/* (direct Node-RED editor compatibility)
-and /api/orangered/* (standard REST API convention).
+Mounts routes under both /redorange/* (direct Node-RED editor compatibility)
+and /api/redorange/* (standard REST API convention).
 """
 
 from __future__ import annotations
@@ -17,13 +17,13 @@ from fastapi import APIRouter, HTTPException, Query, Response
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pathlib import Path
 
-from fastapi_red_orangered.base_node import preview_cache
-from fastapi_red_orangered.conversion import table_to_dataframe
-from fastapi_red_orangered.schemas import ColumnStats, MetricsResponse, TablePreviewResponse
+from red_orange.base_node import preview_cache
+from red_orange.conversion import table_to_dataframe
+from red_orange.schemas import ColumnStats, MetricsResponse, TablePreviewResponse
 
-logger = logging.getLogger("fastapi_red_orangered.api")
+logger = logging.getLogger("red_orange.api")
 
-router = APIRouter(tags=["OrangeRed"])
+router = APIRouter(tags=["RedOrange"])
 
 TEMPLATES_DIR = Path(__file__).resolve().parent.parent.parent / "templates"
 
@@ -46,8 +46,8 @@ def _get_node_output(node_id: str, output_name: str) -> Any:
 # 1. Tabulator Table Preview
 # ======================================================================
 
-@router.get("/orangered/preview/{node_id}/{output_name}")
-@router.get("/api/orangered/preview/{node_id}/{output_name}")
+@router.get("/redorange/preview/{node_id}/{output_name}")
+@router.get("/api/redorange/preview/{node_id}/{output_name}")
 def get_table_preview(node_id: str, output_name: str, rows: int = Query(default=50), offset: int = Query(default=0)):
     from Orange.data import Table as OrangeTable
 
@@ -106,8 +106,8 @@ def get_table_preview(node_id: str, output_name: str, rows: int = Query(default=
 # 2. SciPy Image Preview (PNG Stream)
 # ======================================================================
 
-@router.get("/orangered/image/{node_id}/{output_name}")
-@router.get("/api/orangered/image/{node_id}/{output_name}")
+@router.get("/redorange/image/{node_id}/{output_name}")
+@router.get("/api/redorange/image/{node_id}/{output_name}")
 def get_image_preview(node_id: str, output_name: str, t: Optional[str] = None):
     import xarray as xr
 
@@ -138,8 +138,8 @@ def get_image_preview(node_id: str, output_name: str, t: Optional[str] = None):
 # 3. Model Evaluation Metrics & Confusion Matrix
 # ======================================================================
 
-@router.get("/orangered/metrics/{node_id}")
-@router.get("/api/orangered/metrics/{node_id}")
+@router.get("/redorange/metrics/{node_id}")
+@router.get("/api/redorange/metrics/{node_id}")
 def get_metrics(node_id: str):
     from Orange.evaluation import Results
     import Orange.evaluation as eval_mod
@@ -192,8 +192,8 @@ def get_metrics(node_id: str):
 # 4. Coefficients (Linear & Logistic Regression)
 # ======================================================================
 
-@router.get("/orangered/coefficients/{node_id}")
-@router.get("/api/orangered/coefficients/{node_id}")
+@router.get("/redorange/coefficients/{node_id}")
+@router.get("/api/redorange/coefficients/{node_id}")
 def get_coefficients(node_id: str):
     model = _get_node_output(node_id, "Model")
     if not (hasattr(model, "coefficients") and hasattr(model, "intercept")):
@@ -232,8 +232,8 @@ def get_coefficients(node_id: str):
 # 5. ROC Curves
 # ======================================================================
 
-@router.get("/orangered/roc/{node_id}")
-@router.get("/api/orangered/roc/{node_id}")
+@router.get("/redorange/roc/{node_id}")
+@router.get("/api/redorange/roc/{node_id}")
 def get_roc(node_id: str):
     from Orange.evaluation import Results
 
@@ -292,8 +292,8 @@ def get_roc(node_id: str):
 # 6. Tree Structure Visualization
 # ======================================================================
 
-@router.get("/orangered/tree/{node_id}")
-@router.get("/api/orangered/tree/{node_id}")
+@router.get("/redorange/tree/{node_id}")
+@router.get("/api/redorange/tree/{node_id}")
 def get_tree_structure(node_id: str, max_depth: int = Query(default=100)):
     model = _get_node_output(node_id, "Model")
 
@@ -375,8 +375,8 @@ def get_tree_structure(node_id: str, max_depth: int = Query(default=100)):
 # 7. Correlations & Rank
 # ======================================================================
 
-@router.get("/orangered/correlations/{node_id}")
-@router.get("/api/orangered/correlations/{node_id}")
+@router.get("/redorange/correlations/{node_id}")
+@router.get("/api/redorange/correlations/{node_id}")
 def get_correlations(node_id: str):
     cache = preview_cache.get(node_id)
     if not cache:
@@ -387,8 +387,8 @@ def get_correlations(node_id: str):
     return widget.matrix_data
 
 
-@router.get("/orangered/rank_scores/{node_id}")
-@router.get("/api/orangered/rank_scores/{node_id}")
+@router.get("/redorange/rank_scores/{node_id}")
+@router.get("/api/redorange/rank_scores/{node_id}")
 def get_rank_scores(node_id: str):
     cache = preview_cache.get(node_id)
     if not cache:
@@ -403,18 +403,18 @@ def get_rank_scores(node_id: str):
 # 8. Tracker Runs & UI Asset
 # ======================================================================
 
-@router.get("/orangered/tracker/runs")
-@router.get("/api/orangered/tracker/runs")
+@router.get("/redorange/tracker/runs")
+@router.get("/api/redorange/tracker/runs")
 def get_tracker_runs(node_id: str = Query(default="")):
-    from fastapi_red_orangered.tracker import list_runs
+    from red_orange.tracker import list_runs
 
     runs = list_runs()
     if node_id:
-        runs = [r for r in runs if r.get("tags", {}).get("orangered.node_id") == node_id]
+        runs = [r for r in runs if r.get("tags", {}).get("redorange.node_id") == node_id]
     return {"runs": runs}
 
 
-@router.get("/orangered/tracker-ui.js")
+@router.get("/redorange/tracker-ui.js")
 def get_tracker_ui():
     ui_path = TEMPLATES_DIR / "nodes" / "or-tracker-ui.js"
     if ui_path.is_file():

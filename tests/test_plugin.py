@@ -1,4 +1,4 @@
-""" Test suite for the OrangeRed FastAPI-Red plugin.
+""" Test suite for the RedOrange Red-Fastapi plugin.
 """
 
 import asyncio
@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from fastapi_red.main import app
 from fastapi_red.runtime.engine import engine
 from fastapi_red.runtime import registry
-from fastapi_red_orangered.base_node import preview_cache
+from red_orange.base_node import preview_cache
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -18,15 +18,15 @@ def init_lifespan():
 
 
 def test_plugin_discovery_and_registry(init_lifespan):
-    """ Test that plugin nodes and HTML templates are registered into FastAPI-Red. """
+    """ Test that plugin nodes and HTML templates are registered into Red-Fastapi. """
     client = init_lifespan
 
     # 1. Verify node list contains Orange nodes
     node_list = registry.get_node_list()
     module_names = {n["module"] for n in node_list}
-    assert "node-red-contrib-orangered" in module_names
+    assert "node-red-contrib-redorange" in module_names
 
-    or_nodes = [n for n in node_list if n["module"] == "node-red-contrib-orangered"]
+    or_nodes = [n for n in node_list if n["module"] == "node-red-contrib-redorange"]
     assert len(or_nodes) >= 40
 
     # 2. Verify HTML template endpoints return valid content
@@ -110,7 +110,7 @@ async def test_preview_api_endpoints(init_lifespan):
     client = init_lifespan
 
     # 1. Test Tabulator preview on file loader
-    res = client.get("/orangered/preview/node_loader/Data?rows=10")
+    res = client.get("/redorange/preview/node_loader/Data?rows=10")
     assert res.status_code == 200
     data = res.json()
     assert data["total_rows"] == 150
@@ -119,7 +119,7 @@ async def test_preview_api_endpoints(init_lifespan):
     assert "column_stats" in data
 
     # 2. Test metrics endpoint on test & score node
-    res_m = client.get("/orangered/metrics/node_eval")
+    res_m = client.get("/redorange/metrics/node_eval")
     assert res_m.status_code == 200
     metrics = res_m.json()
     assert "scores" in metrics

@@ -1,4 +1,4 @@
-""" Base Node adapter connecting HeadlessWidgets with FastAPI-Red's FlowEngine.
+""" Base Node adapter connecting HeadlessWidgets with Red-Fastapi's FlowEngine.
 """
 
 from __future__ import annotations
@@ -8,11 +8,11 @@ import copy
 import logging
 from typing import Any, Dict, List, Optional, Type
 
-from fastapi_red.runtime.node import Node
-from fastapi_red_orangered.headless_widget import HeadlessWidget
-from fastapi_red_orangered.schemas import SignalDesc
+from red_fastapi.runtime.node import Node
+from red_orange.headless_widget import HeadlessWidget
+from red_orange.schemas import SignalDesc
 
-logger = logging.getLogger("fastapi_red_orangered.base_node")
+logger = logging.getLogger("red_orange.base_node")
 
 # Global node cache allowing preview API to fetch last known outputs
 # node_id -> {"widget": HeadlessWidget, "outputs": dict[str, Any], "status": str, "error": str}
@@ -31,7 +31,7 @@ class _NodeOutputSink:
 
 
 class OrangeBaseNode(Node):
-    """ Wraps any OrangeRed HeadlessWidget into an asyncio Node-RED Node.
+    """ Wraps any RedOrange HeadlessWidget into an asyncio Node-RED Node.
     """
 
     widget_cls: Type[HeadlessWidget]
@@ -137,3 +137,4 @@ class OrangeBaseNode(Node):
     async def close(self) -> None:
         await super().close()
         # Clean up preview cache if desired or retain for inspection
+

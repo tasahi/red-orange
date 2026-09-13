@@ -8,7 +8,7 @@ folder layout that MLflow uses, so that running::
 
 instantly picks up all historical data without any migration.
 
-Usage inside OrangeRed is fully automatic: the ``_HLBaseLearner`` calls
+Usage inside RedOrange is fully automatic: the ``_HLBaseLearner`` calls
 :func:`log_training_run` after every successful model fit.
 """
 
@@ -33,7 +33,7 @@ def _root() -> Path:
     """Return the mlruns root directory, creating it if needed."""
     global _MLRUNS_ROOT
     if _MLRUNS_ROOT is None:
-        _MLRUNS_ROOT = Path(os.environ.get("ORANGERED_MLRUNS", "mlruns"))
+        _MLRUNS_ROOT = Path(os.environ.get("REDORANGE_MLRUNS", "mlruns"))
     _MLRUNS_ROOT.mkdir(parents=True, exist_ok=True)
     return _MLRUNS_ROOT
 
@@ -42,7 +42,7 @@ def _root() -> Path:
 # Experiment management
 # ======================================================================
 
-def _ensure_experiment(experiment_id: str = "0", name: str = "OrangeRed") -> Path:
+def _ensure_experiment(experiment_id: str = "0", name: str = "RedOrange") -> Path:
     """Create the experiment folder and meta.yaml if missing."""
     exp_dir = _root() / experiment_id
     exp_dir.mkdir(parents=True, exist_ok=True)
@@ -162,7 +162,7 @@ def log_training_run(
     _set_tag(run_dir, "mlflow.runName", run_name)
     _set_tag(run_dir, "model_type", model_type)
     _set_tag(run_dir, "model_name", model_name)
-    _set_tag(run_dir, "orangered.node_id", node_id)
+    _set_tag(run_dir, "redorange.node_id", node_id)
 
     # Parameters
     for k, v in params.items():

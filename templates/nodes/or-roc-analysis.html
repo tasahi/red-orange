@@ -55,7 +55,7 @@
                 }
                 $('#or-roc-container').html("Loading ROC data...");
 
-                $.getJSON("orangered/roc/" + srcId, function(data) {
+                $.getJSON("redorange/roc/" + srcId, function(data) {
                     if (data.error) {
                         $('#or-roc-container').html("<div style='color:red'>" + data.error + "</div>");
                         return;

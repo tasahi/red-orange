@@ -1,5 +1,5 @@
 """
-Bridge widgets to connect OrangeRed with native Node-RED msg.payload flows.
+Bridge widgets to connect RedOrange with native Node-RED msg.payload flows.
 """
 
 from typing import Any
@@ -11,7 +11,7 @@ from ..conversion import dataframe_to_table, table_to_dataframe
 
 class NodeRedIn(HeadlessWidget):
     """
-    Acts as a data source in OrangeRed.
+    Acts as a data source in RedOrange.
     Accepts JSON payloads injected via the API and outputs them as Orange Tables.
     """
     
@@ -42,7 +42,7 @@ class NodeRedIn(HeadlessWidget):
 
 class NodeRedOut(HeadlessWidget):
     """
-    Acts as a data sink in OrangeRed.
+    Acts as a data sink in RedOrange.
     Receives Orange Tables and caches them to be fetched as JSON via the API.
     """
     

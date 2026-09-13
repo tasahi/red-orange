@@ -35,7 +35,7 @@
                 .appendTo('#dialog-form')
                 .on("click", function() {
                     $('#or-preview-container').html("Loading preview...");
-                    $.getJSON("orangered/preview/" + node.id + "/Data", function(data) {
+                    $.getJSON("redorange/preview/" + node.id + "/Data", function(data) {
                         if (data.error) {
                             $('#or-preview-container').html("<div style='color:red'>" + data.error + "</div>");
                             return;

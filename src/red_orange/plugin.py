@@ -1,25 +1,25 @@
-""" OrangeRed Plugin for FastAPI-Red.
+""" RedOrange Plugin for Red-Fastapi.
 """
 
 from pathlib import Path
 from typing import List
 from fastapi import APIRouter
 
-from fastapi_red.plugins.base import BasePlugin
-from fastapi_red_orangered.api import router as orangered_router
-from fastapi_red_orangered import nodes as or_nodes
+from red_fastapi.plugins.base import BasePlugin
+from red_orange.api import router as redorange_router
+from red_orange import nodes as or_nodes
 
-MODULE_NAME = "node-red-contrib-orangered"
+MODULE_NAME = "node-red-contrib-redorange"
 TEMPLATES_DIR = Path(__file__).resolve().parent.parent.parent / "templates"
 
 
-class OrangeRedPlugin(BasePlugin):
-    """ First-class OrangeRed Data Science and Machine Learning Plugin.
+class RedOrangePlugin(BasePlugin):
+    """ First-class RedOrange Data Science and Machine Learning Plugin.
     """
 
     @property
     def name(self) -> str:
-        return "orangered"
+        return "redorange"
 
     @property
     def version(self) -> str:
@@ -172,4 +172,5 @@ class OrangeRedPlugin(BasePlugin):
             engine.register_type(node_type, constructor)
 
     def get_routers(self) -> List[APIRouter]:
-        return [orangered_router]
+        return [redorange_router]
+

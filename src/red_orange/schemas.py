@@ -1,5 +1,5 @@
 """
-Pydantic models for the OrangeRed API.
+Pydantic models for the RedOrange API.
 
 Defines DomainSchema/ColumnSpec (the sidecar that preserves Orange Domain
 metadata when data crosses the pandas ↔ Orange boundary) and all

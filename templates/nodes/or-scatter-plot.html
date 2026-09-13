@@ -37,7 +37,7 @@
             let currentData = null;
 
             // Fetch data initially
-            $.getJSON("orangered/preview/" + node.id + "/Data?rows=500", function(data) {
+            $.getJSON("redorange/preview/" + node.id + "/Data?rows=500", function(data) {
                 if (data.error) {
                     $('#or-plot-container').html("<div style='color:red'>" + data.error + "</div>");
                     return;

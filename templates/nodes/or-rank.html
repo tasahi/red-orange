@@ -52,7 +52,7 @@
 
             function renderScores() {
                 $("#or-rank-scores-container").html("Loading feature scores...");
-                $.getJSON("orangered/rank_scores/" + node.id, function(data) {
+                $.getJSON("redorange/rank_scores/" + node.id, function(data) {
                     if (!data.ranked_features || data.ranked_features.length === 0) {
                         $("#or-rank-scores-container").html("<div style='padding:10px;'>Run workflow first to calculate rankings.</div>");
                         return;

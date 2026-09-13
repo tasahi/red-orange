@@ -55,7 +55,7 @@
                 }
                 $('#or-cm-container').html("Loading...");
 
-                $.getJSON("orangered/metrics/" + srcId, function(data) {
+                $.getJSON("redorange/metrics/" + srcId, function(data) {
                     if (data.error) {
                         $('#or-cm-container').html("<div style='color:red'>" + data.error + "</div>");
                         return;

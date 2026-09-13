@@ -61,7 +61,7 @@
             }
 
             // Attempt to get schema right away
-            $.getJSON("orangered/preview/" + node.id + "/Data?rows=0", function(data) {
+            $.getJSON("redorange/preview/" + node.id + "/Data?rows=0", function(data) {
                 if (!data.error && data.schema) {
                     updateDropdowns(data.schema);
                 }
@@ -83,7 +83,7 @@
 
                 $('#or-boxplot-container').html("Loading data...");
 
-                $.getJSON("orangered/preview/" + node.id + "/Data?rows=" + maxRows, function(data) {
+                $.getJSON("redorange/preview/" + node.id + "/Data?rows=" + maxRows, function(data) {
                     if (data.error) {
                         $('#or-boxplot-container').html("<div style='color:red'>" + data.error + "</div>");
                         return;

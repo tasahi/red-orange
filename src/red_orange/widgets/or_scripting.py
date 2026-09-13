@@ -1,6 +1,6 @@
 """
 Headless scripting widgets — provides a Jupyter-like Python cell
-inside the OrangeRed visual canvas.
+inside the RedOrange visual canvas.
 
 The user writes arbitrary Python code that executes against the
 input data on the backend, with full access to Orange, NumPy, and Pandas.

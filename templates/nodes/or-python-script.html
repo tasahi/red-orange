@@ -28,7 +28,7 @@
 
             // --- Console Output area ---
             // Try to fetch last console output from the backend
-            $.getJSON("orangered/console/" + node.id, function(data) {
+            $.getJSON("redorange/console/" + node.id, function(data) {
                 if (data && data.output) {
                     $('#or-console-output').val(data.output);
                 } else {

@@ -57,7 +57,7 @@
 
             function loadPreview(outputName) {
                 $('#or-preview-container').html(`Loading ${outputName}...`);
-                $.getJSON("orangered/preview/" + node.id + "/" + outputName, function(data) {
+                $.getJSON("redorange/preview/" + node.id + "/" + outputName, function(data) {
                     if (data.error) {
                         $('#or-preview-container').html("<div style='color:red'>" + data.error + "</div>");
                         return;

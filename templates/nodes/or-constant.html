@@ -1,7 +1,7 @@
 <script type="text/javascript">
-    if (!window.orangeredTrackerLoaded) {
-        window.orangeredTrackerLoaded = true;
-        $.getScript("orangered/tracker-ui.js");
+    if (!window.redorangeTrackerLoaded) {
+        window.redorangeTrackerLoaded = true;
+        $.getScript("redorange/tracker-ui.js");
     }
     RED.nodes.registerType('or-constant', {
         category: 'OR Model',
@@ -16,8 +16,8 @@
         paletteLabel: "Constant",
         label: function() { return this.name || "Constant"; },
         oneditprepare: function() {
-            if (window.orangeredTrackerUI) {
-                window.orangeredTrackerUI.injectHistoryTab(this);
+            if (window.redorangeTrackerUI) {
+                window.redorangeTrackerUI.injectHistoryTab(this);
             }
         }
     });

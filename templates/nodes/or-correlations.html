@@ -40,7 +40,7 @@
                 if (corrData) {
                     return cb(corrData);
                 }
-                $.getJSON("orangered/correlations/" + node.id, function(data) {
+                $.getJSON("redorange/correlations/" + node.id, function(data) {
                     corrData = data;
                     cb(data);
                 }).fail(function() {

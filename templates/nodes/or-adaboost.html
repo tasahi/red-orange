@@ -1,7 +1,7 @@
 <script type="text/javascript">
-    if (!window.orangeredTrackerLoaded) {
-        window.orangeredTrackerLoaded = true;
-        $.getScript("orangered/tracker-ui.js");
+    if (!window.redorangeTrackerLoaded) {
+        window.redorangeTrackerLoaded = true;
+        $.getScript("redorange/tracker-ui.js");
     }
     RED.nodes.registerType('or-adaboost', {
         category: 'OR Model',
@@ -18,8 +18,8 @@
         paletteLabel: "AdaBoost",
         label: function() { return this.name || "AdaBoost"; },
         oneditprepare: function() {
-            if (window.orangeredTrackerUI) {
-                window.orangeredTrackerUI.injectHistoryTab(this);
+            if (window.redorangeTrackerUI) {
+                window.redorangeTrackerUI.injectHistoryTab(this);
             }
         }
     });

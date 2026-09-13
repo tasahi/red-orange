@@ -61,7 +61,7 @@
                 .appendTo('#dialog-form')
                 .on("click", function() {
                     $('#or-metrics-container').html(`Loading Metrics...`);
-                    $.getJSON("orangered/metrics/" + node.id, function(data) {
+                    $.getJSON("redorange/metrics/" + node.id, function(data) {
                         if (data.error) {
                             $('#or-metrics-container').html("<div style='color:red'>" + data.error + "</div>");
                             return;

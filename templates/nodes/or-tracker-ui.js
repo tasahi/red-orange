@@ -2,12 +2,12 @@
  * Shared training history UI for all model nodes.
  *
  * Usage in oneditprepare:
- *   orangeredTracker.addHistoryPanel(node);
+ *   redorangeTracker.addHistoryPanel(node);
  */
 (function() {
-    window.orangeredTracker = window.orangeredTracker || {};
+    window.redorangeTracker = window.redorangeTracker || {};
 
-    window.orangeredTracker.addHistoryPanel = function(node) {
+    window.redorangeTracker.addHistoryPanel = function(node) {
         $('<hr>').appendTo('#dialog-form');
 
         var historyBtn = $('<button type="button" class="ui-button ui-corner-all ui-widget">' +
@@ -20,7 +20,7 @@
         historyBtn.on("click", function() {
             container.html('<div style="color:#888;">Loading training history...</div>');
 
-            $.getJSON("orangered/tracker/runs?node_id=" + node.id, function(resp) {
+            $.getJSON("redorange/tracker/runs?node_id=" + node.id, function(resp) {
                 if (resp.error) {
                     container.html('<div style="color:red;">' + resp.error + '</div>');
                     return;

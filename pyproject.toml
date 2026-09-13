@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "fastapi-red-orangered"
+name = "red-orange"
 version = "0.1.0"
 description = "Orange3 and SciPy data science and machine learning plugin for FastAPI-Red"
 readme = "README.md"
@@ -17,11 +17,12 @@ dependencies = [
     "pillow>=9.0.0",
 ]
 
-[project.entry-points."fastapi_red.plugins"]
-orangered = "fastapi_red_orangered.plugin:OrangeRedPlugin"
+[project.entry-points."red_fastapi.plugins"]
+redorange = "red_orange.plugin:RedOrangePlugin"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
 "*" = ["*.html", "*.js", "*.css", "*.svg", "*.png"]
+

@@ -1,7 +1,7 @@
 <script type="text/javascript">
-    if (!window.orangeredTrackerLoaded) {
-        window.orangeredTrackerLoaded = true;
-        $.getScript("orangered/tracker-ui.js");
+    if (!window.redorangeTrackerLoaded) {
+        window.redorangeTrackerLoaded = true;
+        $.getScript("redorange/tracker-ui.js");
     }
     RED.nodes.registerType('or-svm', {
         category: 'OR Model',
@@ -39,8 +39,8 @@
             $("#node-input-kernel").change();
 
             // Training history panel
-            if (window.orangeredTracker) {
-                window.orangeredTracker.addHistoryPanel(this);
+            if (window.redorangeTracker) {
+                window.redorangeTracker.addHistoryPanel(this);
             }
         }
     });

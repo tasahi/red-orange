@@ -1,7 +1,7 @@
 <script type="text/javascript">
-    if (!window.orangeredTrackerLoaded) {
-        window.orangeredTrackerLoaded = true;
-        $.getScript("orangered/tracker-ui.js");
+    if (!window.redorangeTrackerLoaded) {
+        window.redorangeTrackerLoaded = true;
+        $.getScript("redorange/tracker-ui.js");
     }
     RED.nodes.registerType('or-neural-network', {
         category: 'OR Model',
@@ -21,8 +21,8 @@
         paletteLabel: "Neural Network",
         label: function() { return this.name || "Neural Network"; },
         oneditprepare: function() {
-            if (window.orangeredTrackerUI) {
-                window.orangeredTrackerUI.injectHistoryTab(this);
+            if (window.redorangeTrackerUI) {
+                window.redorangeTrackerUI.injectHistoryTab(this);
             }
         }
     });

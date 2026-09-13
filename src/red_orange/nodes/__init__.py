@@ -1,4 +1,4 @@
-""" Specific node class wrappers for all Orange widgets in FastAPI-Red.
+""" Specific node class wrappers for all Orange widgets in Red-Fastapi.
 """
 
 from __future__ import annotations
@@ -6,8 +6,8 @@ from __future__ import annotations
 import asyncio
 from typing import Any, Dict, List
 
-from fastapi_red_orangered.base_node import OrangeBaseNode
-from fastapi_red_orangered.widgets import (
+from red_orange.base_node import OrangeBaseNode
+from red_orange.widgets import (
     or_data,
     or_model,
     or_preprocess,

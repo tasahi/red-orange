@@ -58,7 +58,7 @@
                 
                 $('#or-tree-container').html("<div style='padding:10px;'>Loading tree structure...</div>");
 
-                $.getJSON("orangered/tree/" + srcId + "?max_depth=" + maxDepth, function(treeData) {
+                $.getJSON("redorange/tree/" + srcId + "?max_depth=" + maxDepth, function(treeData) {
                     if (treeData.error) {
                         $('#or-tree-container').html("<div style='color:red; padding:10px;'>" + treeData.error + "</div>");
                         return;
