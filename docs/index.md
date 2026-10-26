@@ -33,6 +33,7 @@ In-depth technical architecture, decoupled kernel designs, and multi-interface s
 | :--- | :--- |
 | **[Concepts & Core Architecture](architecture/concepts_and_architecture.md)** | Core concepts, functional organization, palette breakdown (OR Data, OR Transform, OR Model, etc.), memory management, and decoupled architecture. |
 | **[React Flow Interface Architecture](architecture/react_flow_architecture.md)** | Modern React Flow interface design, dual-UI selection strategy, JSON-RPC 2.0 communication, bidirectional flow adapters, and spatial parity with Node-RED. |
+| **[Red-Cyan Semantic Prompt & Agent Pack Integration](architecture/cyan_agent_pack_integration.md)** | Integration specification for red-cyan semantic prompt nodes, dynamic Jinja handles, and neuro-symbolic data insight pipelines. |
 
 ---
 
