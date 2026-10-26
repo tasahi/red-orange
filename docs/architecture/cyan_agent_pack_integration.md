@@ -3,7 +3,7 @@ title: Red-Cyan Semantic Prompt & Agent Pack Integration
 document_type: Architecture Specification
 project: red-orange
 target: Integration of Red-Cyan prompt DAGs and agent nodes into Red-Orange React Flow canvas
-status: Implemented (Phases 1, 2 & 3)
+status: Implemented (Phases 1, 2, 3 & 4)
 date: October 2026
 ---
 
@@ -96,4 +96,18 @@ With Phase 3 implemented, communication between quantitative `red-orange` nodes 
      await bridge.callTool("orange_filter_rows", { column: "petal_length", threshold: 2.0 });
      ```
    - This allows reasoning LLM nodes to reactively adapt and steer upstream data mining workflows.
+
+---
+
+## 6. Subgraph-Scoped Knowledge Base Query Studio
+
+Phase 4 introduces the conversational querying layer directly within the React Flow canvas:
+
+1. **`KnowledgeBaseDrawer.tsx`**:
+   - Header button `💡 Knowledge Base` opens an insight query studio.
+   - When one or more nodes are selected on the canvas, the drawer automatically displays:
+     `Scoped to N selected node(s)`.
+   - Queries sent via `cyan.queryKB` are constrained to the selected subgraphs, rendering matching insight texts, similarity scores, and upstream lineage breadcrumbs (`← clean_data ← data_loader`).
+2. **Tri-Tier Persistence Engine**:
+   - Every node execution recorded by `cyan.executeNode` is stored across SQLite (document logs), NetworkX (DAG lineage graph), and vector similarity indices.
 

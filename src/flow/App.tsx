@@ -16,6 +16,7 @@ import {
 import { Palette } from "./Palette.tsx";
 import { OrangeNode } from "./OrangeNode.tsx";
 import { CyanPromptNode } from "./CyanPromptNode.tsx";
+import { KnowledgeBaseDrawer } from "./KnowledgeBaseDrawer.tsx";
 import { RED_ORANGE_DND_MIME, DraggedNodePayload, instantiateDroppedNode } from "./paletteDnd.ts";
 import { validateConnection } from "./nodeViewModel.ts";
 import { ReactFlowNode } from "./types.ts";
@@ -111,6 +112,10 @@ export const AppContent: React.FC = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [isKbDrawerOpen, setIsKbDrawerOpen] = useState<boolean>(false);
+
+  // Selected node IDs for subgraph-scoped KB queries
+  const selectedNodeIds = nodes.filter((n) => n.selected).map((n) => n.id);
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -180,6 +185,17 @@ export const AppContent: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 text-xs">
+          <button
+            type="button"
+            onClick={() => setIsKbDrawerOpen(!isKbDrawerOpen)}
+            className="bg-[#06b6d4] hover:bg-[#0891b2] text-white font-semibold px-2.5 py-1 rounded shadow-sm flex items-center gap-1.5 transition-colors"
+            title="Open Subgraph-Scoped Knowledge Base Query Studio"
+          >
+            <span>💡 Knowledge Base</span>
+            {selectedNodeIds.length > 0 && (
+              <span className="bg-white/25 px-1 py-0.2 rounded text-[10px]">{selectedNodeIds.length}</span>
+            )}
+          </button>
           <button
             type="button"
             onClick={() => alert("Flow deployed successfully over JSON-RPC 2.0 (flows.set)")}
@@ -288,6 +304,13 @@ export const AppContent: React.FC = () => {
             </div>
           </aside>
         )}
+
+        {/* Knowledge Base Query Drawer */}
+        <KnowledgeBaseDrawer
+          isOpen={isKbDrawerOpen}
+          onClose={() => setIsKbDrawerOpen(false)}
+          selectedNodeIds={selectedNodeIds}
+        />
       </div>
     </div>
   );
