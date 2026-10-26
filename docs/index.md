@@ -35,6 +35,7 @@ Welcome to the technical documentation repository for **`red-orange`** (OrangeRe
 | **[Plugin Architecture & Migration Plan](plugin_orangered_plan.md)** | Architectural design document detailing the migration of RedOrange from a multi-process bridge into an in-process native plugin for `red-fastapi`. | Migration Specification |
 | **[React Flow UI Proposal](react_flow_ui_proposal.md)** | Architectural proposal for implementing a modern React Flow interface alongside Node-RED, enabling user UI selection and rich in-node data previews. | Proposal / Architecture |
 | **[React Flow UI Implementation Plan](react_flow_implementation_plan.md)** | Comprehensive implementation roadmap for the React Flow UI: JSON-RPC 2.0 / MCP integration, spatial layout preservation, bidirectional flow adapters, and phased milestones. | Implementation Plan |
+| **[React Flow UI Implementation Report (Phases 1 & 2)](react_flow_phase1_phase2_report.md)** | Technical report detailing the completed Phase 1 (RPC Client & Bidirectional Flow Adapter) and Phase 2 (Declarative Palette, DnD, Custom Node Models). | Technical Report |
 
 ---
 
