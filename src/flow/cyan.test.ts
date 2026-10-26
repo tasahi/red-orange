@@ -81,3 +81,71 @@ describe("Red-Cyan Dynamic Ports & DnD Instantiation", () => {
   });
 });
 
+import { McpBridgeClient } from "./mcpBridgeClient.ts";
+import { JsonRpcClient } from "./rpcClient.ts";
+
+describe("Red-Cyan MCP Bridge Client", () => {
+  it("queries MCP tabular resources over JSON-RPC mock transport", async () => {
+    const mockRpc = new JsonRpcClient();
+    (mockRpc as any).call = async (method: string, params: any) => {
+      if (method === "resources/list") {
+        return {
+          resources: [
+            {
+              uri: "resource://red-orange/datasets/iris/summary",
+              name: "Iris Summary",
+            },
+          ],
+        };
+      }
+      if (method === "resources/read" && params?.uri === "resource://red-orange/datasets/iris/summary") {
+        return {
+          contents: [
+            {
+              uri: params.uri,
+              mimeType: "application/json",
+              text: JSON.stringify({ row_count: 150, target: "species" }),
+            },
+          ],
+        };
+      }
+      throw new Error(`Unexpected method: ${method}`);
+    };
+
+    const bridge = new McpBridgeClient(mockRpc);
+    const resources = await bridge.listResources();
+    assert.strictEqual(resources.length, 1);
+    assert.strictEqual(resources[0].uri, "resource://red-orange/datasets/iris/summary");
+
+    const dataset = await bridge.readResource(resources[0].uri);
+    assert.strictEqual(dataset.row_count, 150);
+    assert.strictEqual(dataset.target, "species");
+  });
+
+  it("invokes quantitative MCP tools for agentic feedback loop", async () => {
+    const mockRpc = new JsonRpcClient();
+    (mockRpc as any).call = async (method: string, params: any) => {
+      if (method === "tools/call" && params?.name === "orange_filter_rows") {
+        return {
+          isError: false,
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify({ status: "filtered", retained_count: 85 }),
+            },
+          ],
+        };
+      }
+      throw new Error(`Unexpected method: ${method}`);
+    };
+
+    const bridge = new McpBridgeClient(mockRpc);
+    const result: any = await bridge.callTool("orange_filter_rows", {
+      column: "petal_length",
+      threshold: 1.5,
+    });
+    assert.strictEqual(result.status, "filtered");
+    assert.strictEqual(result.retained_count, 85);
+  });
+});
+
