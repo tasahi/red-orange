@@ -15,12 +15,14 @@ import {
 } from "@xyflow/react";
 import { Palette } from "./Palette.tsx";
 import { OrangeNode } from "./OrangeNode.tsx";
+import { CyanPromptNode } from "./CyanPromptNode.tsx";
 import { RED_ORANGE_DND_MIME, DraggedNodePayload, instantiateDroppedNode } from "./paletteDnd.ts";
 import { validateConnection } from "./nodeViewModel.ts";
 import { ReactFlowNode } from "./types.ts";
 
 const nodeTypes = {
   orangeNode: OrangeNode,
+  cyanPromptNode: CyanPromptNode,
 };
 
 // Default starter nodes

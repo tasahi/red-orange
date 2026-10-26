@@ -27,6 +27,7 @@ export const NODE_CATEGORIES = [
   "OR Scripting",
   "OR Bridge",
   "OR SciPy",
+  "Cyan Prompt",
   "common",
 ] as const;
 
@@ -40,6 +41,7 @@ export const CATEGORY_COLORS: Record<string, string> = {
   "OR Scripting": "#FA8C16",
   "OR Bridge": "#FAAD14",
   "OR SciPy": "#2F54EB",
+  "Cyan Prompt": "#06B6D4",
   common: "#A0A0A0",
 };
 
@@ -441,6 +443,51 @@ export const NODE_CATALOG: Record<string, NodeCatalogItem> = {
     outputs: 0,
     defaultConfig: { active: true, complete: "payload" },
     description: "Display message payload in debug panel",
+  },
+  // Cyan Prompt & Knowledge Base Nodes
+  "cyan-prompt-transform": {
+    type: "cyan-prompt-transform",
+    category: "Cyan Prompt",
+    label: "Prompt Transform",
+    color: "#06B6D4",
+    icon: "sparkles",
+    inputs: 1,
+    outputs: 1,
+    defaultConfig: {
+      template: "Analyze incoming data: {{ inputs.in1.text_content }}",
+      model: "gpt-4o",
+      temperature: 0.7,
+      staticAttributes: { domain: "general" },
+    },
+    description: "Applies an LLM prompt transformation and outputs an enriched SemanticPayload.",
+  },
+  "cyan-tabular-context": {
+    type: "cyan-tabular-context",
+    category: "Cyan Prompt",
+    label: "Tabular Context",
+    color: "#0891B2",
+    icon: "table",
+    inputs: 1,
+    outputs: 1,
+    defaultConfig: {
+      maxSampleRows: 5,
+      includeCorrelations: true,
+    },
+    description: "Serializes upstream red-orange tabular data into structured semantic prompt context.",
+  },
+  "cyan-synthesis-node": {
+    type: "cyan-synthesis-node",
+    category: "Cyan Prompt",
+    label: "Synthesis & Insight",
+    color: "#0E7490",
+    icon: "book-open",
+    inputs: 1,
+    outputs: 0,
+    defaultConfig: {
+      extractEntities: true,
+      inferSentiment: true,
+    },
+    description: "Synthesizes multi-node inputs into executive insights and records knowledge base lineage.",
   },
 };
 

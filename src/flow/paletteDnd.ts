@@ -45,10 +45,11 @@ export function instantiateDroppedNode(
   customId?: string
 ): ReactFlowNode {
   const id = customId || `node_${Date.now().toString(36)}_${nodeIdCounter++}`;
+  const isCyanNode = payload.category === "Cyan Prompt" || payload.type.startsWith("cyan-");
 
   return {
     id,
-    type: "orangeNode",
+    type: isCyanNode ? "cyanPromptNode" : "orangeNode",
     position: {
       x: Math.round(position.x),
       y: Math.round(position.y),

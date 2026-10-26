@@ -42,6 +42,24 @@ export const JsonRpcErrorCodes = {
 export const FlowWorkspacePlaceholder = true;
 
 /**
+ * Red-Cyan Semantic Prompt & Knowledge Base Types
+ */
+export interface NodeAttributeSet {
+  static: Record<string, unknown>;
+  dynamic: Record<string, unknown>;
+}
+
+export interface SemanticPayload {
+  node_id: string;
+  run_id: string;
+  text_content: string;
+  structured_data?: Record<string, unknown>;
+  attributes: NodeAttributeSet;
+  parent_node_ids?: string[];
+  embedding?: number[];
+}
+
+/**
  * Node-RED canonical Flow and Node schema
  */
 export interface NodeRedBaseNode {
