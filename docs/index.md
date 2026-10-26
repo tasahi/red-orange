@@ -33,6 +33,8 @@ Welcome to the technical documentation repository for **`red-orange`** (OrangeRe
 | **[2. Developer Guide](2_developer_guide.md)** | Technical specification for plugin developers: node life-cycle, widget porting from Orange3/SciPy, template structure, communication APIs, and testing workflows. | Developer Manual |
 | **[3. User Guide](3_user_guide.md)** | End-user handbook: step-by-step workflow construction, dataset inspection with Tabulator, model evaluation (ROC, Confusion Matrix), interactive visualizations (Plotly), and image processing pipelines. | User Handbook |
 | **[Plugin Architecture & Migration Plan](plugin_orangered_plan.md)** | Architectural design document detailing the migration of RedOrange from a multi-process bridge into an in-process native plugin for `red-fastapi`. | Migration Specification |
+| **[React Flow UI Proposal](react_flow_ui_proposal.md)** | Architectural proposal for implementing a modern React Flow interface alongside Node-RED, enabling user UI selection and rich in-node data previews. | Proposal / Architecture |
+| **[React Flow UI Implementation Plan](react_flow_implementation_plan.md)** | Comprehensive implementation roadmap for the React Flow UI: JSON-RPC 2.0 / MCP integration, spatial layout preservation, bidirectional flow adapters, and phased milestones. | Implementation Plan |
 
 ---
 
