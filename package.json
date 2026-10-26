@@ -1,0 +1,15 @@
+{
+  "name": "red-orange-flow",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "React Flow UI and JSON-RPC 2.0 Client for Red-Orange / Red-FastAPI",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "node --test dist/**/*.test.js",
+    "build": "tsc"
+  },
+  "keywords": ["node-red", "react-flow", "json-rpc", "orange3"],
+  "author": "",
+  "license": "Apache-2.0"
+}
