@@ -1,7 +1,8 @@
 import React from "react";
-import { Handle, Position, NodeProps } from "@xyflow/react";
+import { Handle, Position } from "@xyflow/react";
+import type { NodeProps } from "@xyflow/react";
 import { computeNodeViewModel } from "./nodeViewModel.ts";
-import { ReactFlowNodeData } from "./types.ts";
+import type { ReactFlowNodeData } from "./types.ts";
 
 export interface OrangeNodeProps extends NodeProps {
   data: ReactFlowNodeData;
@@ -19,6 +20,7 @@ export interface OrangeNodeProps extends NodeProps {
  */
 export const OrangeNode: React.FC<OrangeNodeProps> = ({ id, data, selected, onTrigger }) => {
   const vm = computeNodeViewModel(data);
+  const badgeText = String(vm.catalogItem?.label || "OR").slice(0, 2).toUpperCase();
 
   return (
     <div
@@ -68,7 +70,7 @@ export const OrangeNode: React.FC<OrangeNodeProps> = ({ id, data, selected, onTr
         className="w-7 h-full flex items-center justify-center font-bold text-white text-[10px] rounded-l-sm flex-shrink-0"
         style={{ backgroundColor: vm.badgeColor }}
       >
-        {vm.catalogItem.label.slice(0, 2).toUpperCase()}
+        <span>{badgeText}</span>
       </div>
 
       {/* Node Label & Subtitle */}

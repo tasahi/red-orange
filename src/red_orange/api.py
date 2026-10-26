@@ -1,5 +1,4 @@
-""" FastAPI APIRouter for RedOrange preview, metrics, and diagnostics.
-
+""" FastAPI APIRouter for RedOrange preview, metrics, and diagnostics.\n
 Mounts routes under both /redorange/* (direct Node-RED editor compatibility)
 and /api/redorange/* (standard REST API convention).
 """
@@ -419,4 +418,37 @@ def get_tracker_ui():
     ui_path = TEMPLATES_DIR / "nodes" / "or-tracker-ui.js"
     if ui_path.is_file():
         return FileResponse(ui_path, media_type="application/javascript")
+    return Response(status_code=404)
+
+
+# ======================================================================
+# 9. React Flow SPA Interface
+# ======================================================================
+
+DIST_DIR = Path(__file__).resolve().parent.parent.parent / "dist"
+
+@router.get("/ui/react-flow")
+@router.get("/ui/react-flow/")
+def get_react_flow_ui():
+    """ Serves the compiled React Flow SPA.
+    """
+    index_html = DIST_DIR / "index.html"
+    if index_html.is_file():
+        return FileResponse(index_html, media_type="text/html")
+    return Response(
+        content="<h3>React Flow UI build not found.</h3><p>Please run <code>npm run build</code> in <code>red-orange</code>.</p>",
+        media_type="text/html",
+        status_code=404,
+    )
+
+
+@router.get("/assets/{file_path:path}")
+def get_react_flow_asset(file_path: str):
+    """ Serves compiled React Flow assets (JS, CSS, SVGs).
+    """
+    asset_file = DIST_DIR / "assets" / file_path
+    if asset_file.is_file():
+        suffix = asset_file.suffix.lower()
+        media_type = "application/javascript" if suffix == ".js" else "text/css" if suffix == ".css" else None
+        return FileResponse(asset_file, media_type=media_type)
     return Response(status_code=404)

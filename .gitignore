@@ -28,3 +28,4 @@ ENV/
 *.swp
 *.swo
 
+node_modules/

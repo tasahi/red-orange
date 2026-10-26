@@ -80,14 +80,14 @@ test("FlowAdapter: Bidirectional Conversion (Round-Trip) Fidelity", () => {
     (e) => e.source === "node_loader" && e.target === "node_sampler"
   );
   assert.ok(edgeLoaderToSampler);
-  assert.equal(edgeLoaderToSampler.sourceHandle, "out-0");
-  assert.equal(edgeLoaderToSampler.targetHandle, "in-0");
+  assert.equal(edgeLoaderToSampler?.sourceHandle, "out-0");
+  assert.equal(edgeLoaderToSampler?.targetHandle, "in-0");
 
   const edgeSamplerToTable = reactFlowGraph.edges.find(
     (e) => e.source === "node_sampler" && e.target === "node_table"
   );
   assert.ok(edgeSamplerToTable);
-  assert.equal(edgeSamplerToTable.sourceHandle, "out-1"); // 2nd output port!
+  assert.equal(edgeSamplerToTable?.sourceHandle, "out-1"); // 2nd output port!
 
   // 2. React Flow -> Node-RED (Round-Trip)
   const roundTripFlow = convertReactFlowToNodeRed(reactFlowGraph);

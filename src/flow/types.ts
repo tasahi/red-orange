@@ -77,6 +77,12 @@ export interface ReactFlowXYPosition {
   y: number;
 }
 
+export interface NodeStatus {
+  fill?: "green" | "red" | "yellow" | "blue" | "grey" | string;
+  shape?: "dot" | "ring";
+  text?: string;
+}
+
 export interface ReactFlowNodeData {
   type: string;
   name?: string;
@@ -86,6 +92,7 @@ export interface ReactFlowNodeData {
   outputs?: number;
   category?: string;
   config: Record<string, unknown>;
+  status?: NodeStatus;
   [key: string]: unknown;
 }
 
