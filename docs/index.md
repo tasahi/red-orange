@@ -4,55 +4,67 @@ document_type: Documentation Hub / Table of Contents
 project: red-orange
 target: Orange3 and SciPy Data Mining, Machine Learning, and N-D Image Processing plugin for red-fastapi
 status: Operational
-date: September 2026
+date: October 2026
 ---
 
 # Red-Orange Technical Documentation Index
 
 **Project:** `red-orange`  
-**Document Type:** Documentation Hub / Table of Contents  
-**Status:** Operational (40+ Nodes across 9 Palette Categories)  
 **Host Framework:** `red-fastapi`  
-**Date:** September 2026  
+**Document Type:** Documentation Hub / Table of Contents  
+**Status:** Operational (40+ Nodes across 9 Palette Categories & Dual UI Support)  
+**Date:** October 2026  
 
 ---
 
-## Overview
+## 1. Overview
 
-Welcome to the technical documentation repository for **`red-orange`** (OrangeRed). This package brings **Orange3** data mining, machine learning, and **SciPy/xarray** N-dimensional scientific computing natively into **`red-fastapi`** as an in-process Python plugin.
-
----
-
-## Documentation Directory
-
-### English Documentation
-
-| Document | Description | Type |
-| :--- | :--- | :--- |
-| **[1. Concepts & Architecture](1_concepts_and_introduction.md)** | Core concepts, functional organization, palette breakdown (OR Data, OR Transform, OR Model, etc.), memory management, and decoupled architecture. | Architecture & Concepts |
-| **[2. Developer Guide](2_developer_guide.md)** | Technical specification for plugin developers: node life-cycle, widget porting from Orange3/SciPy, template structure, communication APIs, and testing workflows. | Developer Manual |
-| **[3. User Guide](3_user_guide.md)** | End-user handbook: step-by-step workflow construction, dataset inspection with Tabulator, model evaluation (ROC, Confusion Matrix), interactive visualizations (Plotly), and image processing pipelines. | User Handbook |
-| **[Plugin Architecture & Migration Plan](plugin_orangered_plan.md)** | Architectural design document detailing the migration of RedOrange from a multi-process bridge into an in-process native plugin for `red-fastapi`. | Migration Specification |
-| **[React Flow UI Proposal](react_flow_ui_proposal.md)** | Architectural proposal for implementing a modern React Flow interface alongside Node-RED, enabling user UI selection and rich in-node data previews. | Proposal / Architecture |
-| **[React Flow UI Implementation Plan](react_flow_implementation_plan.md)** | Comprehensive implementation roadmap for the React Flow UI: JSON-RPC 2.0 / MCP integration, spatial layout preservation, bidirectional flow adapters, and phased milestones. | Implementation Plan |
-| **[React Flow UI Implementation Report (Phases 1 & 2)](react_flow_phase1_phase2_report.md)** | Technical report detailing the completed Phase 1 (RPC Client & Bidirectional Flow Adapter) and Phase 2 (Declarative Palette, DnD, Custom Node Models). | Technical Report |
+Welcome to the documentation repository for **`red-orange`** (OrangeRed). This package brings **Orange3** data mining, machine learning, and **SciPy/xarray** N-dimensional scientific computing natively into **`red-fastapi`** as an in-process Python plugin, supporting both classic **Node-RED** and modern **React Flow** web interfaces.
 
 ---
 
-### Documentación en Español
+## 2. Documentation Directory
 
-| Documento | Descripción | Tipo |
-| :--- | :--- | :--- |
-| **[1. Conceptos y Arquitectura](es/1_concepts_and_introduction_es.md)** | Fundamentos conceptuales, desacoplamiento de Orange3, gestión de memoria e integración con el canvas de Node-RED. | Arquitectura y Conceptos |
-| **[2. Guía del Desarrollador](es/2_developer_guide_es.md)** | Ciclo de vida de nodos, creación de widgets personalizados, plantillas HTML y pruebas automatizadas. | Manual de Desarrollo |
-| **[3. Guía del Usuario](es/3_user_guide_es.md)** | Construcción de flujos, previsualización de datos interactiva, entrenamiento de modelos y análisis multidimensional. | Manual de Usuario |
-| **[Resumen del Proyecto](es/README_es.md)** | Descripción general del proyecto en español. | Resumen General |
+### Architecture & System Design (`docs/architecture/`)
+
+In-depth technical architecture, decoupled kernel designs, and multi-interface specifications.
+
+| Document | Description |
+| :--- | :--- |
+| **[Concepts & Core Architecture](architecture/concepts_and_architecture.md)** | Core concepts, functional organization, palette breakdown (OR Data, OR Transform, OR Model, etc.), memory management, and decoupled architecture. |
+| **[React Flow Interface Architecture](architecture/react_flow_architecture.md)** | Modern React Flow interface design, dual-UI selection strategy, JSON-RPC 2.0 communication, bidirectional flow adapters, and spatial parity with Node-RED. |
 
 ---
 
-## Quick Links
+### Guides & Manuals (`docs/guides/`)
 
-- **Main Repository Overview:** [README.md](../README.md)
-- **License:** [Apache 2.0 License](../LICENSE)
-- **Host Project (`red-fastapi`):** [Red-Fastapi on GitHub](https://github.com/tasahi/red-fastapi)
+Practical references for users, developers, and workflow designers.
 
+| Document | Description |
+| :--- | :--- |
+| **[User Guide](guides/user_guide.md)** | End-user handbook: step-by-step workflow construction, dataset inspection with Tabulator, model evaluation (ROC, Confusion Matrix), interactive visualizations (Plotly), and image processing pipelines. |
+| **[Developer Guide](guides/developer_guide.md)** | Technical specification for plugin developers: node lifecycle, widget porting from Orange3/SciPy, template structure, communication APIs, and testing workflows. |
+
+---
+
+### Evolution & Historical Records (`docs/history/`)
+
+Records of project transitions, historical milestones, and design iterations preserved for future reference and audits.
+
+| Record | Description |
+| :--- | :--- |
+| **[Legacy Bridge to In-Process Plugin Migration](history/legacy_bridge_to_plugin_migration.md)** | Design document detailing the architectural transition from an external multi-process bridge into an in-process native plugin for `red-fastapi`. |
+| **[React Flow Master Roadmap](history/react_flow_master_plan.md)** | Complete blueprint detailing the roadmap for the React Flow web interface, JSON-RPC 2.0 integration, and UI switcher. |
+| **[Flow Adapter & Palette Report](history/react_flow_adapter_and_palette_report.md)** | Technical verification report on the JSON-RPC 2.0 client, bidirectional flow translation, and declarative palette system. |
+| **[Workspace & Deployment Plan](history/react_flow_workspace_and_deployment_plan.md)** | Specification for multi-tab workspace state management (`WorkspaceStore`), Deploy controller over JSON-RPC, and header navigation. |
+
+---
+
+### Documentación en Español (`docs/es/`)
+
+| Documento | Descripción |
+| :--- | :--- |
+| **[1. Conceptos y Arquitectura](es/1_concepts_and_introduction_es.md)** | Fundamentos conceptuales, desacoplamiento de Orange3, gestión de memoria e integración con el canvas de Node-RED. |
+| **[2. Guía del Desarrollador](es/2_developer_guide_es.md)** | Ciclo de vida de nodos, creación de widgets personalizados, plantillas HTML y pruebas automatizadas. |
+| **[3. Guía del Usuario](es/3_user_guide_es.md)** | Construcción de flujos, previsualización de datos interactiva, entrenamiento de modelos y análisis multidimensional. |
+| **[Resumen del Proyecto](es/README_es.md)** | Descripción general del proyecto en español. |
